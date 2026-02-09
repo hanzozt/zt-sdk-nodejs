@@ -40,6 +40,10 @@ extern void init_nodejs_debug(uv_loop_t *loop);
 #define NAPI_UNDEFINED(env, var) \
 napi_value var; NAPI_CHECK(env, "get undefined", napi_get_undefined(env, &var))
 
+#define NAPI_LITERAL(env, var, s) \
+napi_value var; NAPI_CHECK(env, "create string literal " #var, \
+napi_create_string_utf8(env, s, sizeof(s) - 1, &var))
+
 #define NAPI_GLOBAL(env, var) \
 napi_value var; NAPI_CHECK(env, "get global", napi_get_global(env, &var))
 
