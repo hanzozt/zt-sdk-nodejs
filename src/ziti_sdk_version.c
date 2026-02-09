@@ -22,7 +22,7 @@ limitations under the License.
 /**
  * 
  */
-napi_value _ziti_sdk_version(napi_env env, const napi_callback_info info) {
+static napi_value ziti_sdk_version(napi_env env, const napi_callback_info info) {
   napi_value jsRetval = NULL;
   napi_status status = napi_generic_failure;
 
@@ -34,23 +34,4 @@ napi_value _ziti_sdk_version(napi_env env, const napi_callback_info info) {
   return jsRetval;
 }
 
-
-/**
- * 
- */
-void expose_ziti_sdk_version(napi_env env, napi_value exports) {
-  napi_status status;
-  napi_value fn;
-
-  status = napi_create_function(env, NULL, 0, _ziti_sdk_version, NULL, &fn);
-  if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to wrap native function '_ziti_sdk_version");
-  }
-
-  status = napi_set_named_property(env, exports, "ziti_sdk_version", fn);
-  if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to populate exports for 'ziti_sdk_version");
-  }
-
-}
-
+ZNODE_EXPOSE(ziti_sdk_version, ziti_sdk_version)
