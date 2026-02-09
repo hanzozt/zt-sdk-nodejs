@@ -259,7 +259,7 @@ jobs:
           ./build/**/*log
 
     - name: Run tests
-      if: matrix.config.arch == runner.arch
+      if: matrix.config.arch == runner.arch && github.ref_type != 'tag'
       shell: bash
       run: npm test
 
