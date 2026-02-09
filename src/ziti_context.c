@@ -375,6 +375,7 @@ static napi_value ztx_shutdown(napi_env env, napi_callback_info info) {
         AddonData *addon_data = (AddonData*)ziti_app_ctx(ztx);
         if (addon_data && addon_data->tsfn) {
             napi_release_threadsafe_function(addon_data->tsfn, napi_tsfn_release);
+            free(addon_data);
         }
         ziti_shutdown(ztx);
     }
