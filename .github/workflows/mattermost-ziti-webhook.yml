@@ -20,9 +20,11 @@ jobs:
     continue-on-error: true
     runs-on: ubuntu-latest
     name: Ziti Mattermost Action - Py
+    env:
+      ZITI_ID: ${{ secrets.ZITI_MATTERMOST_IDENTITY }}
     steps:
     - uses: openziti/ziti-mattermost-action-py@v1
-      if: github.event_name != 'pull_request_review' && secrets.ZITI_MATTERMOST_IDENTITY != ''
+      if: github.event_name != 'pull_request_review' && env.ZITI_ID != ''
       with:
         zitiId: ${{ secrets.ZITI_MATTERMOST_IDENTITY }}
         webhookUrl: ${{ secrets.ZHOOK_URL_DEV_NOTIFICATIONS }}
@@ -30,7 +32,7 @@ jobs:
         senderUsername: "GitHubZ"
 
     - uses: openziti/ziti-mattermost-action-py@v1
-      if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved' && secrets.ZITI_MATTERMOST_IDENTITY != ''
+      if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved' && env.ZITI_ID != ''
       with:
         zitiId: ${{ secrets.ZITI_MATTERMOST_IDENTITY }}
         webhookUrl: ${{ secrets.ZHOOK_URL_DEV_NOTIFICATIONS }}
