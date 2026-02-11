@@ -17,6 +17,7 @@ permissions:
 
 jobs:
   ziti-webhook:
+    if: secrets.ZITI_MATTERMOST_IDENTITY != '' && secrets.ZHOOK_URL_DEV_NOTIFICATIONS != ''
     continue-on-error: true
     runs-on: ubuntu-latest
     name: Ziti Mattermost Action - Py
