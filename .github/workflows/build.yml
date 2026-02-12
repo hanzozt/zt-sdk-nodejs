@@ -259,7 +259,11 @@ jobs:
           ./build/**/*log
 
     - name: Run tests
-      if: matrix.config.arch == runner.arch && github.ref_type != 'tag'
+      # run tests on matching arch
+      # skip tests on Windows and node20: test globbing does not work there
+      if: |
+        matrix.config.arch == runner.arch && 
+        (matrix.node_ver != '20' || matrix.config.target != 'windows')
       shell: bash
       run: npm test
 
