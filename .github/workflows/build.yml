@@ -110,7 +110,7 @@ jobs:
         id: cache-restore
         with:
           path: ${{ env.CI_CACHE }}
-          key: deps-${{ matrix.config.target }}-${{ matrix.config.arch }}-${{ hashFiles('./vcpkg.json') }}
+          key: deps-${{ matrix.config.target }}-${{ matrix.config.arch }}-${{ hashFiles('./vcpkg.json', './vcpkg-overlays/**/*') }}
           restore-keys: |
             dep-${{ matrix.config.target }}-${{ matrix.config.arch }}-
             dep-${{ matrix.config.arch }}-
@@ -129,7 +129,7 @@ jobs:
         uses: actions/cache/save@v5
         with:
           path: ${{ env.CI_CACHE }}
-          key: deps-${{ matrix.config.target }}-${{ matrix.config.arch }}-${{ hashFiles('./vcpkg.json') }}
+          key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
   # -------------------------------------------------------------------------------
   #  Do a clean build, test, and publish
@@ -232,7 +232,7 @@ jobs:
       id: cache-restore
       with:
         path: ${{ env.CI_CACHE }}
-        key: deps-${{ matrix.config.target }}-${{ matrix.config.arch }}-${{ hashFiles('./vcpkg.json') }}
+        key: deps-${{ matrix.config.target }}-${{ matrix.config.arch }}-${{ hashFiles('./vcpkg.json', './vcpkg-overlays/**/*') }}
 
     - name: Build NodeJS-SDK
       id: buildSDK
@@ -259,7 +259,11 @@ jobs:
           ./build/**/*log
 
     - name: Run tests
-      if: matrix.config.arch == runner.arch && github.ref_type != 'tag'
+      # run tests on matching arch
+      # skip tests on Windows and node20: test globbing does not work there
+      if: |
+        matrix.config.arch == runner.arch && 
+        (matrix.node_ver != '20' || matrix.config.target != 'windows')
       shell: bash
       run: npm test
 
