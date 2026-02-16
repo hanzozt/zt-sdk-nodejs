@@ -71,6 +71,8 @@ napi_value Init(napi_env env, napi_value exports) {
 
   expose_ziti_set_log_level(env, exports);
   expose_ziti_set_logger(env, exports);
+  expose_ziti_connect(env, exports);
+  expose_get_ziti_service(env, exports);
 
   return exports;
 }
