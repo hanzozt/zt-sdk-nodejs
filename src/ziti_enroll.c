@@ -15,23 +15,27 @@ limitations under the License.
 */
 
 #include "ziti-nodejs.h"
+#include <stc/cstr.h>
+/**
+ *
+ */
+typedef struct {
+    napi_threadsafe_function tsfn_on_enroll;
+    int err;
+    cstr err_msg;
+    cstr config;
+} EnrollAddonData;
 
-
-// An item that will be generated here and passed into the JavaScript enroll callback
-typedef struct EnrollItem {
-
-  unsigned char *json_salvo;
-  int status;
-  char *err;
-
-} EnrollItem;
-
-
+static void EnrollAddonData_drop(EnrollAddonData* data) {
+  cstr_drop(&data->err_msg);
+  cstr_drop(&data->config);
+  free(data);
+}
 /**
  * This function is responsible for calling the JavaScript callback function 
  * that was specified when the ziti_enroll(...) was called from JavaScript.
  */
-static void CallJs_on_enroll(napi_env env, napi_value js_cb, void* context, void* data) {
+static void CallJs_on_enroll(napi_env env, napi_value js_cb, void* context, void* d) {
 
   napi_status status;
 
@@ -41,64 +45,31 @@ static void CallJs_on_enroll(napi_env env, napi_value js_cb, void* context, void
   (void) context;
 
   // Retrieve the EnrollItem created by the worker thread.
-  EnrollItem* item = (EnrollItem*)data;
+  EnrollAddonData* data = (EnrollAddonData*)d;
 
-  ZITI_NODEJS_LOG(DEBUG, "item->json_salvo: %s", item->json_salvo);
-  ZITI_NODEJS_LOG(DEBUG, "item->status: %d", item->status);
-  ZITI_NODEJS_LOG(DEBUG, "item->err: %s", item->err);
+  ZITI_NODEJS_LOG(DEBUG, "enroll status: %d/%s", data->err, cstr_str(&data->err_msg));
+  ZITI_NODEJS_LOG(DEBUG, "item->config: %s", cstr_str(&data->config));
+  napi_release_threadsafe_function(data->tsfn_on_enroll, napi_tsfn_release);
 
   // env and js_cb may both be NULL if Node.js is in its cleanup phase, and
   // items are left over from earlier thread-safe calls from the worker thread.
   // When env is NULL, we simply skip over the call into Javascript
   if (env != NULL) {
+    NAPI_GLOBAL(env, global);
 
-    napi_value undefined;
-
-    // Retrieve the JavaScript `undefined` value so we can use it as the `this`
-    // value of the JavaScript function call.
-    assert(napi_get_undefined(env, &undefined) == napi_ok);
-
-    // const obj = {}
-    napi_value js_enroll_item, js_json_salvo, js_status, js_err;
-    status = napi_create_object(env, &js_enroll_item);
-    if (status != napi_ok) {
-      napi_throw_error(env, NULL, "Unable to napi_create_object");
+    if (data->err != ZITI_OK) {
+      napi_value err, err_str;
+      NAPI_CHECK(env, "create error string",
+                 napi_create_string_utf8(env, cstr_str(&data->err_msg), cstr_size(&data->err_msg), &err_str));
+      NAPI_CHECK(env, "create error", napi_create_error(env, NULL, err_str, &err));
+      NAPI_CHECK(env, "callback with error", napi_call_function(env, global, js_cb, 1, &err, NULL));
+    } else {
+      napi_value result[2];
+      NAPI_CHECK(env, "get undefined", napi_get_undefined(env, &result[0]));
+      NAPI_CHECK(env, "create config string",
+                 napi_create_string_utf8(env, cstr_str(&data->config), cstr_size(&data->config), &result[1]));
+      NAPI_CHECK(env, "callback with success", napi_call_function(env, global, js_cb, 2, result, NULL));
     }
-
-    // obj.identity = identity
-    if (NULL != item->json_salvo) {
-      napi_create_string_utf8(env, (const char*)item->json_salvo, NAPI_AUTO_LENGTH, &js_json_salvo);
-      napi_set_named_property(env, js_enroll_item, "identity", js_json_salvo);
-    }
-
-    // obj.status = status
-    napi_create_int64(env, (int64_t)item->status, &js_status);
-    napi_set_named_property(env, js_enroll_item, "status", js_status);
-
-    // obj.err = err
-    if (NULL != item->err) {
-      napi_create_string_utf8(env, (const char*)item->err, NAPI_AUTO_LENGTH, &js_err);
-      napi_set_named_property(env, js_enroll_item, "err", js_err);
-    }
-
-
-    // Call the JavaScript function and pass it the EnrollItem
-    napi_value global;
-    status = napi_get_global(env, &global);
-
-    status = napi_call_function(
-      env,
-      global,
-      js_cb,
-      1,
-      &js_enroll_item,
-      NULL
-    );
-
-    if (status != napi_ok) {
-      napi_throw_error(env, "EINVAL", "failure to invoke JS callback");
-    }
-
   }
 }
 
@@ -112,23 +83,15 @@ void on_ziti_enroll(const ziti_config *cfg, int status, const char *err, void *c
   ZITI_NODEJS_LOG(DEBUG, "\nstatus: %d, \nerr: %s,\nctx: %p", status, err, ctx);
 
   EnrollAddonData* addon_data = (EnrollAddonData*)ctx;
-
-  EnrollItem* item = memset(malloc(sizeof(*item)), 0, sizeof(*item));
-
-  item->status = status;
-
-  if (NULL != err) {
-    item->err = calloc(1, strlen(err) + 1);
-    strcpy(item->err, err);
-  } else {
-    item->err = NULL;
+  addon_data->err = status;
+  if (err) {
+    cstr_assign(&addon_data->err_msg, err);
   }
-
-  if (status == ZITI_OK) {
+  if (cfg != NULL) {
     size_t len;
     char *output_buf = ziti_config_to_json(cfg, 0, &len);
-    item->json_salvo = calloc(1, len + 1);
-    strcpy(item->json_salvo, output_buf);
+    cstr_assign(&addon_data->config, output_buf);
+    free(output_buf);
   }
 
   // Initiate the call into the JavaScript callback. 
@@ -136,21 +99,14 @@ void on_ziti_enroll(const ziti_config *cfg, int status, const char *err, void *c
   // when this function returns, but it will be queued.
   nstatus = napi_call_threadsafe_function(
       addon_data->tsfn_on_enroll,
-      item,
+      addon_data,
       napi_tsfn_blocking);
   if (nstatus != napi_ok) {
     ZITI_NODEJS_LOG(ERROR, "Unable to napi_call_threadsafe_function");
   }
-
 }
 
-
-
-
-/**
- * 
- */
-napi_value _ziti_enroll(napi_env env, const napi_callback_info info) {
+static napi_value z_enroll(napi_env env, const napi_callback_info info) {
   napi_status status;
   napi_value jsRetval;
   napi_valuetype js_cb_type;
@@ -174,8 +130,11 @@ napi_value _ziti_enroll(napi_env env, const napi_callback_info info) {
 
   // Obtain location of JWT file
   size_t result;
-  char JWTFileName[256];
-  status = napi_get_value_string_utf8(env, args[0], JWTFileName, 256, &result);
+  char *jwt = NULL;
+  NAPI_CHECK(env, "get JWT", napi_get_value_string_utf8(env, args[0], jwt, 0, &result));
+  jwt = malloc(result + 1);
+  NAPI_CHECK(env, "get JWT", napi_get_value_string_utf8(env, args[0], jwt, result + 1, &result));
+  jwt[result] = 0;
 
   // Obtain ptr to JS callback function
   // napi_value js_cb = args[1];
@@ -185,62 +144,33 @@ napi_value _ziti_enroll(napi_env env, const napi_callback_info info) {
   } else {
     ZITI_NODEJS_LOG(DEBUG, "args[1] IS a napi_function");
   }
-  napi_value work_name;
-
-  EnrollAddonData* addon_data = memset(malloc(sizeof(*addon_data)), 0, sizeof(*addon_data));
+  EnrollAddonData* addon_data = calloc(1, sizeof(*addon_data));
 
   // Create a string to describe this asynchronous operation.
-  assert(napi_create_string_utf8(
-    env,
-    "N-API on_ziti_enroll",
-    NAPI_AUTO_LENGTH,
-    &work_name) == napi_ok);
+  NAPI_LITERAL(env, work_name, "N-API on_ziti_enroll");
 
-  // Convert the callback retrieved from JavaScript into a thread-safe function (tsfn) 
+  // Convert the callback retrieved from JavaScript into a thread-safe function (tsfn)
   // which we can call from a worker thread.
-  status = napi_create_threadsafe_function(
-      env,
-      args[1],
-      NULL,
-      work_name,
-      0,
-      1,
-      NULL,
-      NULL,
-      NULL,
-      CallJs_on_enroll,
-      &(addon_data->tsfn_on_enroll));
-  if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to napi_create_threadsafe_function");
-  }
-
+  NAPI_CHECK(env, "create thread-safe function",
+             napi_create_threadsafe_function(
+                     env, args[1], NULL, work_name,
+                     0, 1, NULL, NULL, NULL, CallJs_on_enroll,
+                     &(addon_data->tsfn_on_enroll)));
 
   // Initiate the enrollment
   ziti_enroll_opts opts = {0};
-  opts.token = JWTFileName;
+  opts.token = jwt;
   int rc = ziti_enroll(&opts, thread_loop, on_ziti_enroll, addon_data);
+  free(jwt);
 
-  status = napi_create_int32(env, rc, &jsRetval);
-  if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to create return value");
+  if (rc != ZITI_OK) {
+    ZITI_NODEJS_LOG(ERROR, "ziti_enroll failed: %d/%s", rc, ziti_errorstr(rc));
+    napi_throw_error(env, NULL, ziti_errorstr(rc)); // does not return
+    return NULL;
   }
 
-  return jsRetval;
+  NAPI_UNDEFINED(env, undefined);
+  return undefined;
 }
 
-
-void expose_ziti_enroll(napi_env env, napi_value exports) {
-  napi_status status;
-  napi_value fn;
-
-  status = napi_create_function(env, NULL, 0, _ziti_enroll, NULL, &fn);
-  if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to wrap native function '_ziti_enroll");
-  }
-
-  status = napi_set_named_property(env, exports, "ziti_enroll", fn);
-  if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to populate exports for 'ziti_enroll");
-  }
-
-}
+ZNODE_EXPOSE(ziti_enroll, z_enroll)
