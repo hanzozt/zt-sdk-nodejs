@@ -80,13 +80,7 @@ UV_EXTERN int uv_gettimeofday(uv_timeval64_t* tv);
 #  endif
 
 
-/**
- * 
- */
-typedef struct {
-  napi_async_work work;
-  napi_threadsafe_function tsfn_on_enroll;
-} EnrollAddonData;
+
 
 
 /**
