@@ -73,6 +73,9 @@ static napi_value z_connect(napi_env env, napi_callback_info info) {
     napi_value args[4] = {};
     NAPI_CHECK(env, "parse args", napi_get_cb_info(env, info, &argc, args, NULL, NULL));
 
+    if (argc < 2) {
+        napi_throw_error(env, NULL, "too few arguments, signature => (service, [terminator,] callback)");
+    }
     napi_valuetype cb_type;
     napi_typeof(env, args[argc - 1], &cb_type);
     if (cb_type != napi_function) {

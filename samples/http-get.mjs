@@ -1,7 +1,7 @@
 import ziti from '../ziti.js';
 import http from 'node:http';
 
-// Usage node http-agent.mjs <identity.json> <url>
+// Usage node http-get.mjs <identity.json> <url>
 // <url> can be a Ziti service intercept (e.g. http://myserver.ziti:8080) or http://<service-name> (port does not matter)
 const IDENTITY_FILE = process.argv[2];
 const URL    = process.argv[3];
