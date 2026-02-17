@@ -16,6 +16,10 @@ limitations under the License.
 
 #include "ziti-nodejs.h"
 
+#ifndef MAXHOSTNAMELEN
+#define MAXHOSTNAMELEN 1025
+#endif
+
 struct conn_data {
     ziti_connection conn;
     napi_threadsafe_function on_connect;
