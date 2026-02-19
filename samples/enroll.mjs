@@ -1,4 +1,4 @@
-// import ziti from '@openziti/ziti-sdk-nodejs';
+// import ziti from '@hanzozt/ziti-sdk-nodejs';
 import ziti from '../ziti.js';
 
 const jwt_path = process.argv[2];

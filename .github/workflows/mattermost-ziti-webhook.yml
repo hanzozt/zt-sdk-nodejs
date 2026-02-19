@@ -23,7 +23,7 @@ jobs:
     env:
       ZITI_ID: ${{ secrets.ZITI_MATTERMOST_IDENTITY }}
     steps:
-    - uses: openziti/ziti-mattermost-action-py@v1
+    - uses: hanzozt/ziti-mattermost-action-py@v1
       if: github.event_name != 'pull_request_review' && env.ZITI_ID != ''
       with:
         zitiId: ${{ secrets.ZITI_MATTERMOST_IDENTITY }}
@@ -31,7 +31,7 @@ jobs:
         eventJson: ${{ toJson(github.event) }}
         senderUsername: "GitHubZ"
 
-    - uses: openziti/ziti-mattermost-action-py@v1
+    - uses: hanzozt/ziti-mattermost-action-py@v1
       if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved' && env.ZITI_ID != ''
       with:
         zitiId: ${{ secrets.ZITI_MATTERMOST_IDENTITY }}

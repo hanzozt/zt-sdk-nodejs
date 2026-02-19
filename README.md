@@ -1,48 +1,48 @@
-![Ziggy using the ziti-sdk-nodejs](https://raw.githubusercontent.com/openziti/branding/main/images/banners/Node.jpg)
+![Ziggy using the ziti-sdk-nodejs](https://raw.githubusercontent.com/hanzozt/branding/main/images/banners/Node.jpg)
 
 <p align="center" width="100%">
-OpenZiti is a free and open source project focused on bringing zero trust to any application.
+Hanzo ZT is a free and open source project focused on bringing zero trust to any application.
      <br>
 The project provides all the pieces required to implement or integrate zero trust into your solutions.
 <br/>
 <br/>
 Please star us.
 <br/>
-<a href="https://github.com/openziti/ziti/stargazers"><img src="https://img.shields.io/github/stars/openziti/ziti?style=flat" ></a>
+<a href="https://github.com/hanzozt/ziti/stargazers"><img src="https://img.shields.io/github/stars/hanzozt/ziti?style=flat" ></a>
 <br/>
      <br>
 </p>
 
 <p align="center" width="100%">
-<a href="https://openziti.io"><img src="ziti.png" width="100"></a>
+<a href="https://hanzozt.dev"><img src="ziti.png" width="100"></a>
 </p>
 
 <p align="center">
     <b>
-    <a>@openziti/ziti-sdk-nodejs</a>
+    <a>@hanzozt/ziti-sdk-nodejs</a>
     <br>
     <br>
     <b>
-    This repo hosts the OpenZiti SDK for NodeJS, and is designed to help you deliver secure applications over a <a href="https://openziti.io">OpenZiti Network</a>
+    This repo hosts the Hanzo ZT SDK for NodeJS, and is designed to help you deliver secure applications over a <a href="https://hanzozt.dev">Hanzo ZT Network</a>
     <br>
     <br>
-    <b>Part of the <a href="https://openziti.io/about">OpenZiti</a> ecosystem</b>
+    <b>Part of the <a href="https://hanzozt.dev/about">Hanzo ZT</a> ecosystem</b>
 </p>
 
 <p align="center">
     <br>
     <b>Are you interested in knowing how to easily embed programmable, high performance, zero trust networking into your NodeJS app, on any internet connection, without VPNs?
     <br>
-    Learn more about our <a href="https://openziti.io/about">OpenZiti</a> project.</b>
+    Learn more about our <a href="https://hanzozt.dev/about">Hanzo ZT</a> project.</b>
     <br>
     </p>
 
 ---
-[![Build Status](https://github.com/openziti/ziti-sdk-nodejs/workflows/Build/badge.svg?branch=main)]()
-[![Issues](https://img.shields.io/github/issues-raw/openziti/ziti-sdk-nodejs)]()
-[![npm version](https://badge.fury.io/js/@openziti%2Fziti-sdk-nodejs.svg)](https://badge.fury.io/js/@openziti%2Fziti-sdk-nodejs.svg)
+[![Build Status](https://github.com/hanzozt/ziti-sdk-nodejs/workflows/Build/badge.svg?branch=main)]()
+[![Issues](https://img.shields.io/github/issues-raw/hanzozt/ziti-sdk-nodejs)]()
+[![npm version](https://badge.fury.io/js/@hanzozt%2Fziti-sdk-nodejs.svg)](https://badge.fury.io/js/@hanzozt%2Fziti-sdk-nodejs.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![LOC](https://img.shields.io/tokei/lines/github/openziti/ziti-sdk-nodejs)]()
+[![LOC](https://img.shields.io/tokei/lines/github/hanzozt/ziti-sdk-nodejs)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=rounded)](CONTRIBUTING.md)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
@@ -50,23 +50,23 @@ Please star us.
 
 # Associated Article(s)
 For more context on this SDK, you may be interested in this
-[article concerning how to secure NodeJS applications](https://blog.openziti.io/securing-nodejs-applications)
+[article concerning how to secure NodeJS applications](https://blog.hanzozt.dev/securing-nodejs-applications)
 
 
 
 # Supported platforms
 
-The `@openziti/ziti-sdk-nodejs` module works with the following Node.js versions:
+The `@hanzozt/ziti-sdk-nodejs` module works with the following Node.js versions:
 - v20.x 
 - v22.x
 - v24.x
 - v25.x
 
-The `@openziti/ziti-sdk-nodejs` module works with the following architectures:
+The `@hanzozt/ziti-sdk-nodejs` module works with the following architectures:
 - amd64
 - arm64
 
-The `@openziti/ziti-sdk-nodejs` module works with the following Operating Systems:
+The `@hanzozt/ziti-sdk-nodejs` module works with the following Operating Systems:
 - macos
 - linux
 - windows
@@ -76,20 +76,20 @@ The `@openziti/ziti-sdk-nodejs` module works with the following Operating System
 
 NPM
 ``` js
-npm i @openziti/ziti-sdk-nodejs
+npm i @hanzozt/ziti-sdk-nodejs
 ```
 or Yarn
 ``` js
-yarn add @openziti/ziti-sdk-nodejs
+yarn add @hanzozt/ziti-sdk-nodejs
 ```
 
 Special note on previous package:
 
-On June 7, 2020 @openziti/ziti-sdk-nodejs@0.6.0 was released. Older, unscoped versions that are not part of the @openziti org are deprecated and only @openziti/ziti-sdk-nodejs will see updates going forward. To upgrade to the new package do:
+On June 7, 2020 @hanzozt/ziti-sdk-nodejs@0.6.0 was released. Older, unscoped versions that are not part of the @hanzozt org are deprecated and only @hanzozt/ziti-sdk-nodejs will see updates going forward. To upgrade to the new package do:
 
 ``` js
 npm uninstall ziti-sdk-nodejs --save
-npm install @openziti/ziti-sdk-nodejs --save
+npm install @hanzozt/ziti-sdk-nodejs --save
 ```
 
 # Usage
@@ -98,7 +98,7 @@ npm install @openziti/ziti-sdk-nodejs --save
 
 ESM example (client-side)
 ``` js
-import ziti from '@openziti/ziti-sdk-nodejs';
+import ziti from '@hanzozt/ziti-sdk-nodejs';
 
 // Somehow provide path to identity file, e.g. via env var
 const zitiIdentityFile  = process.env.ZITI_IDENTITY_FILE;
@@ -109,9 +109,9 @@ const on_resp_data = ( obj ) => {
     console.log(`response is: ${obj.body.toString('utf8')}`);
 };
 
-// Perform an HTTP GET request to a dark OpenZiti web service
+// Perform an HTTP GET request to a dark Hanzo ZT web service
 ziti.httpRequest(
-  'myDarkWebService',            // OpenZiti Service name or HTTP origin part of the URL
+  'myDarkWebService',            // Hanzo ZT Service name or HTTP origin part of the URL
   undefined,                     // schemeHostPort parm is mutually-exclusive with serviceName parm
   'GET',
   '/',                           // path part of the URL including query params
@@ -125,7 +125,7 @@ ziti.httpRequest(
 
 ESM example (server-side ExpressJS)
 ``` js
-import ziti from '@openziti/ziti-sdk-nodejs';
+import ziti from '@hanzozt/ziti-sdk-nodejs';
 import express from 'express';
 let app = ziti.express( express, zitiServiceName );
 app.listen(ignored, function() { ... }
@@ -151,7 +151,7 @@ No malicious actors can see your dark web server, and thus, no malicious actors 
 
 CJS example (client-side)
 ``` js
-var ziti = require('@openziti/ziti-sdk-nodejs');
+var ziti = require('@hanzozt/ziti-sdk-nodejs');
 
 const ziti_init = async (identity) => {
     return new Promise((resolve) => {
@@ -220,11 +220,11 @@ For doc concerning API's contained in this SDK, you may be interested in this
 
 Getting Help
 ------------
-Please use these community resources for getting help. We use GitHub [issues](https://github.com/openziti/ziti-sdk-nodejs/issues) 
+Please use these community resources for getting help. We use GitHub [issues](https://github.com/hanzozt/ziti-sdk-nodejs/issues) 
 for tracking bugs and feature requests and have limited bandwidth to address them.
 
-- Read the [docs](https://openziti.github.io/ziti/overview.html)
-- Participate in discussion on [Discourse](https://openziti.discourse.group/)
+- Read the [docs](https://hanzozt.github.io/ziti/overview.html)
+- Participate in discussion on [Discourse](https://community.hanzozt.dev/)
 
 
 # Building from source on MacOS
@@ -236,7 +236,7 @@ export VCPKG_ROOT=`pwd`/vcpkg
 brew install cmake
 brew install ninja
 brew install pkg-config
-git clone https://github.com/openziti/ziti-sdk-nodejs.git
+git clone https://github.com/hanzozt/ziti-sdk-nodejs.git
 cd ziti-sdk-nodejs
 npm run build
 ```
