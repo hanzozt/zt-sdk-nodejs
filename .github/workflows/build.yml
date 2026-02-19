@@ -270,9 +270,9 @@ jobs:
     - name: upload artifacts
       uses: actions/upload-artifact@v6
       with:
-        name: ziti_nodejs_${{ matrix.config.target }}_${{ matrix.config.arch }}_nodev${{ matrix.node_ver }}
+        name: zt_nodejs_${{ matrix.config.target }}_${{ matrix.config.arch }}_nodev${{ matrix.node_ver }}
         path: |
-          ./build/stage/**/ziti_sdk_nodejs*.tar.gz
+          ./build/stage/**/zt_sdk_nodejs*.tar.gz
           if-no-files-found: error
 
   publish:
@@ -297,7 +297,7 @@ jobs:
       uses: actions/download-artifact@v7
       with:
         path: ./artifacts
-        pattern: ziti_nodejs_*
+        pattern: zt_nodejs_*
 
     - name: list artifacts
       run: |
@@ -309,7 +309,7 @@ jobs:
       with:
         fail_on_unmatched_files: true
         files: |
-          ./artifacts/**/ziti_sdk_nodejs*.tar.gz
+          ./artifacts/**/zt_sdk_nodejs*.tar.gz
 
     - name: NPM Publish
       if: github.ref_type == 'tag'

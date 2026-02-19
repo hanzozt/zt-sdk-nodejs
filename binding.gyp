@@ -1,5 +1,5 @@
 {
-  # "includes": [ "deps/common-ziti.gypi" ],
+  # "includes": [ "deps/common-zt.gypi" ],
 
   # The "cd" variable is passed in, and used, only during Windows builds
   'variables': {
@@ -27,31 +27,31 @@
       "product_dir": "<(module_path)",
 
       "sources": [ 
-        "./src/ziti-add-on.c",
-        "./src/ziti_close.c",
-        "./src/ziti_dial.c",
-        "./src/ziti_enroll.c",
-        "./src/ziti_hello.c",
+        "./src/zt-add-on.c",
+        "./src/zt_close.c",
+        "./src/zt_dial.c",
+        "./src/zt_enroll.c",
+        "./src/zt_hello.c",
         "./src/Ziti_https_request.c",
         "./src/Ziti_https_request_data.c",
         "./src/Ziti_https_request_end.c",
-        "./src/ziti_init.c",
-        "./src/ziti_listen.c",
-        "./src/ziti_service_available.c",
-        "./src/ziti_set_log_level.c",
-        "./src/ziti_shutdown.c",
-        "./src/ziti_write.c",
-        "./src/ziti_websocket_connect.c",
-        "./src/ziti_websocket_write.c",
+        "./src/zt_init.c",
+        "./src/zt_listen.c",
+        "./src/zt_service_available.c",
+        "./src/zt_set_log_level.c",
+        "./src/zt_shutdown.c",
+        "./src/zt_write.c",
+        "./src/zt_websocket_connect.c",
+        "./src/zt_websocket_write.c",
         # "./src/stack_traces.c",
         "./src/utils.c",
       ],
 
       "include_dirs": [
-          "deps/ziti-sdk-c/includes",
-          "deps/ziti-sdk-c/build/_deps/uv-mbed-src/include",
-          "deps/ziti-sdk-c/build/_deps/http_parser-src",
-          "deps/ziti-sdk-c/build/_deps/uv_link-src/include",
+          "deps/zt-sdk-c/includes",
+          "deps/zt-sdk-c/build/_deps/uv-mbed-src/include",
+          "deps/zt-sdk-c/build/_deps/http_parser-src",
+          "deps/zt-sdk-c/build/_deps/uv_link-src/include",
       ],
 
       "conditions": [
@@ -79,21 +79,21 @@
         ["OS=='mac'", {
 
           "libraries": [ 
-            "$(PWD)/deps/ziti-sdk-c/build/_deps/libuv-build/libuv_a.a",
-            "$(PWD)/deps/ziti-sdk-c/build/_deps/libsodium-build/lib/libsodium.a",
-            "$(PWD)/deps/ziti-sdk-c/build/_deps/uv-mbed-build/libuv_mbed.a",
-            "$(PWD)/deps/ziti-sdk-c/build/library/libziti.a",        
+            "$(PWD)/deps/zt-sdk-c/build/_deps/libuv-build/libuv_a.a",
+            "$(PWD)/deps/zt-sdk-c/build/_deps/libsodium-build/lib/libsodium.a",
+            "$(PWD)/deps/zt-sdk-c/build/_deps/uv-mbed-build/libuv_mbed.a",
+            "$(PWD)/deps/zt-sdk-c/build/library/libzt.a",        
 
 
             # These are used when a local Xcode debug build is in play
-            # "$(PWD)/deps/ziti-sdk-c/build/deps/uv-mbed/deps/Debug/libhttp-parser.a",
-            # "$(PWD)/deps/ziti-sdk-c/build/deps/uv-mbed/deps/mbedtls/crypto/library/Debug/libmbedcrypto.a",
-            # "$(PWD)/deps/ziti-sdk-c/build/deps/uv-mbed/deps/mbedtls/library/Debug/libmbedtls.a",
-            # "$(PWD)/deps/ziti-sdk-c/build/deps/uv-mbed/deps/mbedtls/library/Debug/libmbedx509.a",
-            # "$(PWD)/deps/ziti-sdk-c/build/deps/uv-mbed/deps/libuv/Debug/libuv_a.a",
-            # "$(PWD)/deps/ziti-sdk-c/build/deps/uv-mbed/deps/Debug/libuv_link.a",
-            # "$(PWD)/deps/ziti-sdk-c/build/deps/uv-mbed/Debug/libuv_mbed.a",
-            # "$(PWD)/deps/ziti-sdk-c/build/library/Debug/libziti.a",        
+            # "$(PWD)/deps/zt-sdk-c/build/deps/uv-mbed/deps/Debug/libhttp-parser.a",
+            # "$(PWD)/deps/zt-sdk-c/build/deps/uv-mbed/deps/mbedtls/crypto/library/Debug/libmbedcrypto.a",
+            # "$(PWD)/deps/zt-sdk-c/build/deps/uv-mbed/deps/mbedtls/library/Debug/libmbedtls.a",
+            # "$(PWD)/deps/zt-sdk-c/build/deps/uv-mbed/deps/mbedtls/library/Debug/libmbedx509.a",
+            # "$(PWD)/deps/zt-sdk-c/build/deps/uv-mbed/deps/libuv/Debug/libuv_a.a",
+            # "$(PWD)/deps/zt-sdk-c/build/deps/uv-mbed/deps/Debug/libuv_link.a",
+            # "$(PWD)/deps/zt-sdk-c/build/deps/uv-mbed/Debug/libuv_mbed.a",
+            # "$(PWD)/deps/zt-sdk-c/build/library/Debug/libzt.a",        
 
           ],
 
@@ -149,27 +149,27 @@
           ],
 
           "include_dirs": [ 
-            "deps/ziti-sdk-c/includes",
-            "deps/ziti-sdk-c/deps/uv-mbed/include"
+            "deps/zt-sdk-c/includes",
+            "deps/zt-sdk-c/deps/uv-mbed/include"
           ],
           "libraries": [
-            # "<(cd)/deps/ziti-sdk-c/build/_deps/mbedtls-build/library/mbedcrypto.lib",
-            # "<(cd)/deps/ziti-sdk-c/build/_deps/mbedtls-build/library/mbedtls.lib",
-            # "<(cd)/deps/ziti-sdk-c/build/_deps/mbedtls-build/library/mbedx509.lib",
-            "<(cd)/deps/ziti-sdk-c/build/_deps/libuv-build/uv_a.lib",
-            "<(cd)/deps/ziti-sdk-c/build/_deps/libsodium-src/x64/Release/v142/static/libsodium.lib",
-            "<(cd)/deps/ziti-sdk-c/build/_deps/uv-mbed-build/uv_mbed.lib",
-            "<(cd)/deps/ziti-sdk-c/build/library/ziti.lib",
+            # "<(cd)/deps/zt-sdk-c/build/_deps/mbedtls-build/library/mbedcrypto.lib",
+            # "<(cd)/deps/zt-sdk-c/build/_deps/mbedtls-build/library/mbedtls.lib",
+            # "<(cd)/deps/zt-sdk-c/build/_deps/mbedtls-build/library/mbedx509.lib",
+            "<(cd)/deps/zt-sdk-c/build/_deps/libuv-build/uv_a.lib",
+            "<(cd)/deps/zt-sdk-c/build/_deps/libsodium-src/x64/Release/v142/static/libsodium.lib",
+            "<(cd)/deps/zt-sdk-c/build/_deps/uv-mbed-build/uv_mbed.lib",
+            "<(cd)/deps/zt-sdk-c/build/library/zt.lib",
 
-            # "<(cd)/deps/ziti-sdk-c/build/deps/uv-mbed/deps/http-parser.lib",
-            # "<(cd)/deps/ziti-sdk-c/build/deps/uv-mbed/deps/mbedtls/crypto/library/mbedcrypto.lib",
-            # "<(cd)/deps/ziti-sdk-c/build/deps/uv-mbed/deps/mbedtls/library/mbedtls.lib",
-            # "<(cd)/deps/ziti-sdk-c/build/deps/uv-mbed/deps/mbedtls/library/mbedx509.lib",
-            # "<(cd)/deps/ziti-sdk-c/build/deps/uv-mbed/deps/libuv/uv_a.lib",
-            # "<(cd)/deps/ziti-sdk-c/build/deps/uv-mbed/deps/uv_link.lib",
-            # "<(cd)/deps/ziti-sdk-c/build/deps/uv-mbed/uv_mbed.lib",
-            # "<(cd)/deps/ziti-sdk-c/build/library/ziti.lib",
-            # "<(cd)/deps/ziti-sdk-c/build/_deps/libsodium-src/x64/Release/v142/static/libsodium.lib",
+            # "<(cd)/deps/zt-sdk-c/build/deps/uv-mbed/deps/http-parser.lib",
+            # "<(cd)/deps/zt-sdk-c/build/deps/uv-mbed/deps/mbedtls/crypto/library/mbedcrypto.lib",
+            # "<(cd)/deps/zt-sdk-c/build/deps/uv-mbed/deps/mbedtls/library/mbedtls.lib",
+            # "<(cd)/deps/zt-sdk-c/build/deps/uv-mbed/deps/mbedtls/library/mbedx509.lib",
+            # "<(cd)/deps/zt-sdk-c/build/deps/uv-mbed/deps/libuv/uv_a.lib",
+            # "<(cd)/deps/zt-sdk-c/build/deps/uv-mbed/deps/uv_link.lib",
+            # "<(cd)/deps/zt-sdk-c/build/deps/uv-mbed/uv_mbed.lib",
+            # "<(cd)/deps/zt-sdk-c/build/library/zt.lib",
+            # "<(cd)/deps/zt-sdk-c/build/_deps/libsodium-src/x64/Release/v142/static/libsodium.lib",
             "-lws2_32.lib",
             "-lIphlpapi.lib",
             "-lpsapi",
@@ -200,10 +200,10 @@
         ['OS == "linux"', {
 
           "libraries": [
-            "<(module_root_dir)/deps/ziti-sdk-c/build/library/libziti.a",        
-            "<(module_root_dir)/deps/ziti-sdk-c/build/_deps/libuv-build/libuv_a.a",
-            "<(module_root_dir)/deps/ziti-sdk-c/build/_deps/uv-mbed-build/libuv_mbed.a",
-            "<(module_root_dir)/deps/ziti-sdk-c/build/_deps/libsodium-build/lib/libsodium.a",
+            "<(module_root_dir)/deps/zt-sdk-c/build/library/libzt.a",        
+            "<(module_root_dir)/deps/zt-sdk-c/build/_deps/libuv-build/libuv_a.a",
+            "<(module_root_dir)/deps/zt-sdk-c/build/_deps/uv-mbed-build/libuv_mbed.a",
+            "<(module_root_dir)/deps/zt-sdk-c/build/_deps/libsodium-build/lib/libsodium.a",
           ],
 
           "link_settings": {

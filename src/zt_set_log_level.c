@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ziti-nodejs.h"
+#include "zt-nodejs.h"
 #include <stc/cstr.h>
 
 struct log_msg {
@@ -43,7 +43,7 @@ static napi_value set_log_level(napi_env env, napi_callback_info info) {
 
   ZITI_NODEJS_LOG(DEBUG, "js_log_level: %lld", (long long)js_log_level);
 
-  ziti_log_set_level((int)js_log_level, NULL);
+  zt_log_set_level((int)js_log_level, NULL);
 
   NAPI_UNDEFINED(env, jsRetval);
   return jsRetval;
@@ -121,7 +121,7 @@ static napi_value set_logger(napi_env env, napi_callback_info info) {
       napi_release_threadsafe_function(logger_tsfn, napi_tsfn_release);
       logger_tsfn = NULL;
     }
-    ziti_log_set_logger(NULL);
+    zt_log_set_logger(NULL);
   } else {
     if (arg_type != napi_function) {
       napi_throw_error(env, NULL, "Argument must be a function");
@@ -138,7 +138,7 @@ static napi_value set_logger(napi_env env, napi_callback_info info) {
                                                NULL, NULL, NULL, js_logger_cb, &logger_tsfn));
 
     napi_unref_threadsafe_function(env, logger_tsfn);
-    ziti_log_set_logger(js_log_writer);
+    zt_log_set_logger(js_log_writer);
     ZITI_LOG(INFO, "Ziti logger set");
   }
 
@@ -146,5 +146,5 @@ static napi_value set_logger(napi_env env, napi_callback_info info) {
   return jsRetval;
 }
 
-ZNODE_EXPOSE(ziti_set_log_level, set_log_level)
-ZNODE_EXPOSE(ziti_set_logger, set_logger)
+ZNODE_EXPOSE(zt_set_log_level, set_log_level)
+ZNODE_EXPOSE(zt_set_logger, set_logger)

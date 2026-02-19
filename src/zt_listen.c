@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ziti-nodejs.h"
+#include "zt-nodejs.h"
 #include <string.h>
 
 // An item that will be generated here and passed into the JavaScript on_listen_client callback
 typedef struct OnClientItem {
 
   int status;
-  ziti_connection client;
+  zt_connection client;
   int64_t js_arb_data;
   char *caller_id;
   uint8_t *app_data;
@@ -32,7 +32,7 @@ typedef struct OnClientItem {
 
 /**
  * This function is responsible for calling the JavaScript 'on_listen_client_data' callback function 
- * that was specified when the ziti_listen(...) was called from JavaScript.
+ * that was specified when the zt_listen(...) was called from JavaScript.
  */
 static void CallJs_on_listen_client_data(napi_env env, napi_value js_cb, void* context, void* data) {
   napi_status status;
@@ -126,11 +126,11 @@ static void CallJs_on_listen_client_data(napi_env env, napi_value js_cb, void* c
 
 }
 
-static ssize_t on_listen_client_data(ziti_connection client, const uint8_t *data, ssize_t len) {
+static ssize_t on_listen_client_data(zt_connection client, const uint8_t *data, ssize_t len) {
 
   ZITI_NODEJS_LOG(DEBUG, "on_listen_client_data: client: %p, data: %p, len: %zd", client, data, len);
 
-  ListenAddonData* addon_data = (ListenAddonData*) ziti_conn_data(client);
+  ListenAddonData* addon_data = (ListenAddonData*) zt_conn_data(client);
 
   OnClientItem* item = memset(malloc(sizeof(*item)), 0, sizeof(*item));
   item->client = client;
@@ -147,11 +147,11 @@ static ssize_t on_listen_client_data(ziti_connection client, const uint8_t *data
   }
   else if ((len == ZITI_EOF) || (len == ZITI_CONN_CLOSED)) {
       ZITI_NODEJS_LOG(DEBUG, "on_listen_client_data: client disconnected");
-      ziti_close_write(client);
+      zt_close_write(client);
   }
   else {
-      ZITI_NODEJS_LOG(ERROR, "on_listen_client_data: error: %zd(%s)", len, ziti_errorstr(len));
-      ziti_close(client, NULL);
+      ZITI_NODEJS_LOG(ERROR, "on_listen_client_data: error: %zd(%s)", len, zt_errorstr(len));
+      zt_close(client, NULL);
   }
   
   // Initiate the call into the JavaScript callback. 
@@ -171,7 +171,7 @@ static ssize_t on_listen_client_data(ziti_connection client, const uint8_t *data
 
 /**
  * This function is responsible for calling the JavaScript 'on_listen_client_connect' callback function 
- * that was specified when the ziti_listen(...) was called from JavaScript.
+ * that was specified when the zt_listen(...) was called from JavaScript.
  */
 static void CallJs_on_listen_client_connect(napi_env env, napi_value js_cb, void* context, void* data) {
   napi_status status;
@@ -263,11 +263,11 @@ static void CallJs_on_listen_client_connect(napi_env env, napi_value js_cb, void
   }
 }
 
-static void on_listen_client_connect(ziti_connection client, int status) {
+static void on_listen_client_connect(zt_connection client, int status) {
 
   ZITI_NODEJS_LOG(DEBUG, "on_listen_client_connect: client: %p, status: %d", client, status);
 
-  ListenAddonData* addon_data = (ListenAddonData*) ziti_conn_data(client);
+  ListenAddonData* addon_data = (ListenAddonData*) zt_conn_data(client);
 
   OnClientItem* item = memset(malloc(sizeof(*item)), 0, sizeof(*item));
   item->status = status;
@@ -289,7 +289,7 @@ static void on_listen_client_connect(ziti_connection client, int status) {
 
 /**
  * This function is responsible for calling the JavaScript 'on_listen' callback function 
- * that was specified when the ziti_listen(...) was called from JavaScript.
+ * that was specified when the zt_listen(...) was called from JavaScript.
  */
 static void CallJs_on_listen(napi_env env, napi_value js_cb, void* context, void* data) {
   napi_status status;
@@ -340,7 +340,7 @@ static void CallJs_on_listen(napi_env env, napi_value js_cb, void* context, void
 
 /**
  * This function is responsible for calling the JavaScript 'data' callback function 
- * that was specified when the ziti_dial(...) was called from JavaScript.
+ * that was specified when the zt_dial(...) was called from JavaScript.
  */
 static void CallJs_on_listen_client(napi_env env, napi_value js_cb, void* context, void* data) {
   napi_status status;
@@ -473,17 +473,17 @@ static void CallJs_on_listen_client(napi_env env, napi_value js_cb, void* contex
 /**
  * 
  */
-void on_listen_client(ziti_connection serv, ziti_connection client, int status, const ziti_client_ctx *clt_ctx) {
+void on_listen_client(zt_connection serv, zt_connection client, int status, const zt_client_ctx *clt_ctx) {
 
   ZITI_NODEJS_LOG(INFO, "on_listen_client: client: %p, status: %d, clt_ctx: %p", client, status, clt_ctx);
 
   napi_status nstatus;
 
-  ListenAddonData* addon_data = (ListenAddonData*) ziti_conn_data(serv);
+  ListenAddonData* addon_data = (ListenAddonData*) zt_conn_data(serv);
 
   if (status == ZITI_OK) {
 
-    ziti_conn_set_data(client, addon_data);
+    zt_conn_set_data(client, addon_data);
 
     const char *source_identity = clt_ctx->caller_id;
     if (source_identity != NULL) {
@@ -496,10 +496,10 @@ void on_listen_client(ziti_connection serv, ziti_connection client, int status, 
         ZITI_NODEJS_LOG(DEBUG, "on_listen_client: got app data '%.*s'!", (int) clt_ctx->app_data_sz, clt_ctx->app_data );
     }
 
-    ziti_accept(client, on_listen_client_connect, on_listen_client_data);
+    zt_accept(client, on_listen_client_connect, on_listen_client_data);
   
   } else {
-    ZITI_NODEJS_LOG(DEBUG, "on_listen_client: failed to accept client: %s(%d)\n", ziti_errorstr(status), status );
+    ZITI_NODEJS_LOG(DEBUG, "on_listen_client: failed to accept client: %s(%d)\n", zt_errorstr(status), status );
   }
 
   OnClientItem* item = memset(malloc(sizeof(*item)), 0, sizeof(*item));
@@ -530,17 +530,17 @@ void on_listen_client(ziti_connection serv, ziti_connection client, int status, 
 /**
  * 
  */
-void on_listen(ziti_connection serv, int status) {
+void on_listen(zt_connection serv, int status) {
   napi_status nstatus;
 
-  ListenAddonData* addon_data = (ListenAddonData*) ziti_conn_data(serv);
+  ListenAddonData* addon_data = (ListenAddonData*) zt_conn_data(serv);
 
   if (status == ZITI_OK) {
     ZITI_NODEJS_LOG(DEBUG, "on_listen: successfully bound to service[%s]", addon_data->service_name );
   }
   else {
     ZITI_NODEJS_LOG(DEBUG, "on_listen: failed to bind to service[%s]\n", addon_data->service_name );
-    ziti_close(serv, NULL);
+    zt_close(serv, NULL);
   }
 
   // Initiate the call into the JavaScript callback. 
@@ -559,7 +559,7 @@ void on_listen(ziti_connection serv, int status) {
 /**
  * 
  */
-napi_value _ziti_listen(napi_env env, const napi_callback_info info) {
+napi_value _zt_listen(napi_env env, const napi_callback_info info) {
 
   napi_status status;
   size_t argc = 6;
@@ -724,19 +724,19 @@ napi_value _ziti_listen(napi_env env, const napi_callback_info info) {
   // pass context around between our callbacks, as propagate it all the way out
   // to the JavaScript callbacks
   addon_data->service_name = strdup(ServiceName);
-  int rc = ziti_conn_init(ztx, &addon_data->server, addon_data);
+  int rc = zt_conn_init(ztx, &addon_data->server, addon_data);
   if (rc != ZITI_OK) {
-    napi_throw_error(env, NULL, "failure in 'ziti_conn_init");
+    napi_throw_error(env, NULL, "failure in 'zt_conn_init");
   }
 
   // Start listening
-  ZITI_NODEJS_LOG(DEBUG, "calling ziti_listen_with_options: %p, addon_data: %p", ztx, addon_data);
-  ziti_listen_opts listen_opts = {
+  ZITI_NODEJS_LOG(DEBUG, "calling zt_listen_with_options: %p, addon_data: %p", ztx, addon_data);
+  zt_listen_opts listen_opts = {
     .bind_using_edge_identity = false,
   };
 
-  ziti_listen_with_options(addon_data->server, ServiceName, &listen_opts, on_listen, on_listen_client);
-  // ziti_listen_with_options(addon_data->server, ServiceName, NULL, on_listen, on_listen_client);
+  zt_listen_with_options(addon_data->server, ServiceName, &listen_opts, on_listen, on_listen_client);
+  // zt_listen_with_options(addon_data->server, ServiceName, NULL, on_listen, on_listen_client);
 
   return NULL;
 }
@@ -746,18 +746,18 @@ napi_value _ziti_listen(napi_env env, const napi_callback_info info) {
 /**
  * 
  */
-void expose_ziti_listen(napi_env env, napi_value exports) {
+void expose_zt_listen(napi_env env, napi_value exports) {
   napi_status status;
   napi_value fn;
 
-  status = napi_create_function(env, NULL, 0, _ziti_listen, NULL, &fn);
+  status = napi_create_function(env, NULL, 0, _zt_listen, NULL, &fn);
   if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to wrap native function '_ziti_listen");
+    napi_throw_error(env, NULL, "Unable to wrap native function '_zt_listen");
   }
 
-  status = napi_set_named_property(env, exports, "ziti_listen", fn);
+  status = napi_set_named_property(env, exports, "zt_listen", fn);
   if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to populate exports for 'ziti_listen");
+    napi_throw_error(env, NULL, "Unable to populate exports for 'zt_listen");
   }
 
 }

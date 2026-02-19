@@ -1,37 +1,37 @@
-import ziti from "../ziti.js";
+import zt from "../zt.js";
 import assert from "node:assert";
 import test from "node:test";
 const suite = test.suite;
 
-ziti.setLogLevel(5)
+zt.setLogLevel(5)
 
 suite("Ziti SDK Context Tests", { timeout: 30000 }, () => {
     test.afterEach(() => {
-        ziti.ziti_shutdown()
+        zt.zt_shutdown()
     })
 
-    test("ziti.shutdown not fail", () => {
-        ziti.ziti_shutdown()
+    test("zt.shutdown not fail", () => {
+        zt.zt_shutdown()
     })
 
-    test("ziti.ziti_init with bad args", (done) => {
+    test("zt.zt_init with bad args", (done) => {
         assert.throws(() => {
-            ziti.ziti_init()
+            zt.zt_init()
         }, {
             message: "Too few arguments",
             code: "EINVAL"
         })
         assert.throws(() => {
-            ziti.ziti_init("valid-config")
+            zt.zt_init("valid-config")
         }, {
             message: "Too few arguments",
             code: "EINVAL"
         })
     })
 
-    test("ziti.ziti_init with invalid config", (done) => {
+    test("zt.zt_init with invalid config", (done) => {
         assert.throws(() => {
-                ziti.ziti_init("not-a-valid-config", () => {
+                zt.zt_init("not-a-valid-config", () => {
                     assert.fail("should not called")
                 })
             },
@@ -40,7 +40,7 @@ suite("Ziti SDK Context Tests", { timeout: 30000 }, () => {
                 code: 'EINVAL'
             }
         )
-        ziti.init("not-a-valid-config").then(
+        zt.init("not-a-valid-config").then(
             () => {
                 assert.fail("should not resolve")
             },
@@ -49,7 +49,7 @@ suite("Ziti SDK Context Tests", { timeout: 30000 }, () => {
                 assert.strictEqual(err.code, 'EINVAL')
             }
         )
-        assert.rejects(() => ziti.init("not-a-valid-config"),
+        assert.rejects(() => zt.init("not-a-valid-config"),
             {
                 code: 'EINVAL',
                 message: 'configuration not found'
@@ -67,11 +67,11 @@ suite("Ziti SDK Context Tests", { timeout: 30000 }, () => {
 
         const cfgStr = JSON.stringify(cfg)
         assert.throws(() => {
-            ziti.ziti_init(cfgStr, (err) => {
+            zt.zt_init(cfgStr, (err) => {
                 assert.fail("should not called")
             })
         })
-        assert.rejects(() => ziti.init(cfgStr), { message: 'configuration is invalid'})
+        assert.rejects(() => zt.init(cfgStr), { message: 'configuration is invalid'})
     })
 
     test("complete but invalid config", async () => {
@@ -85,7 +85,7 @@ suite("Ziti SDK Context Tests", { timeout: 30000 }, () => {
         }
 
         const cfgStr = JSON.stringify(cfg)
-        await assert.rejects(() => ziti.init(cfgStr), { message: 'configuration is invalid'})
+        await assert.rejects(() => zt.init(cfgStr), { message: 'configuration is invalid'})
     })
 
 })

@@ -1,8 +1,8 @@
 {
-  "name": "@hanzozt/ziti-sdk-nodejs",
+  "name": "@hanzozt/zt-sdk-nodejs",
   "description": "A NodeJS-based SDK for delivering secure applications over a Ziti Network",
   "version": "0.27.0",
-  "main": "./lib/ziti",
+  "main": "./lib/zt",
   "scripts": {
     "build": "npm run build:configure && npm run build:make",
     "build:configure": "run-script-os",
@@ -17,12 +17,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hanzozt/ziti-sdk-nodejs.git"
+    "url": "git+https://github.com/hanzozt/zt-sdk-nodejs.git"
   },
   "binary": {
-    "module_name": "ziti_sdk_nodejs",
+    "module_name": "zt_sdk_nodejs",
     "module_path": "./build/{configuration}/",
-    "remote_path": "./hanzozt/ziti-sdk-nodejs/releases/download/{version}/",
+    "remote_path": "./hanzozt/zt-sdk-nodejs/releases/download/{version}/",
     "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}.tar.gz",
     "host": "https://github.com"
   },
@@ -34,7 +34,7 @@
     }
   ],
   "keywords": [
-    "ziti",
+    "zt",
     "nodejs"
   ],
   "engines": {

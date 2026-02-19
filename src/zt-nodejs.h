@@ -28,8 +28,8 @@ limitations under the License.
 #define NAPI_EXPERIMENTAL
 #include <node_api.h>
 
-#include <ziti/ziti.h>
-#include <ziti/ziti_log.h>
+#include <zt/zt.h>
+#include <zt/zt_log.h>
 #include "utils.h"
 
 
@@ -101,7 +101,7 @@ typedef struct {
 typedef struct {
   char *service_name;
   int64_t js_arb_data;
-  ziti_connection server;
+  zt_connection server;
   napi_async_work work;
   napi_threadsafe_function tsfn_on_listen;
   napi_threadsafe_function tsfn_on_listen_client;
@@ -117,7 +117,7 @@ typedef struct {
   napi_threadsafe_function tsfn_on_connect;
   napi_threadsafe_function tsfn_on_data;
   napi_threadsafe_function tsfn_on_write;
-  tlsuv_src_t ziti_src;
+  tlsuv_src_t zt_src;
   tlsuv_websocket_t ws;
   uv_connect_t req;
   uint32_t headers_array_length;
@@ -162,7 +162,7 @@ typedef struct HttpsReq {
 typedef struct {
   char* scheme_host_port;
   tlsuv_http_t client;
-  tlsuv_src_t ziti_src;
+  tlsuv_src_t zt_src;
   bool active;
   bool purge;
 } HttpsClient;
@@ -170,7 +170,7 @@ typedef struct {
 struct HttpsAddonData {
   napi_env env;
   tlsuv_http_t client;
-  tlsuv_http_req_t ziti_src;
+  tlsuv_http_req_t zt_src;
   napi_threadsafe_function tsfn_on_req;
   napi_threadsafe_function tsfn_on_resp;
   napi_threadsafe_function tsfn_on_resp_body;
@@ -194,32 +194,32 @@ struct HttpsAddonData {
 extern "C" {
 #endif
 
-extern ziti_context ztx;
+extern zt_context ztx;
 extern uv_loop_t *thread_loop;
 
 extern uv_mutex_t client_pool_lock;
 
 // extern void set_signal_handler();
 
-extern void expose_ziti_close(napi_env env, napi_value exports);
-extern void expose_ziti_dial(napi_env env, napi_value exports);
-extern void expose_ziti_enroll(napi_env env, napi_value exports);
-extern void expose_ziti_sdk_version(napi_env env, napi_value exports);
-extern void expose_ziti_init(napi_env env, napi_value exports);
-extern void expose_ziti_listen(napi_env env, napi_value exports);
-extern void expose_ziti_service_available(napi_env env, napi_value exports);
-extern void expose_ziti_services_refresh(napi_env env, napi_value exports);
-extern void expose_ziti_set_log_level(napi_env env, napi_value exports);
-extern void expose_ziti_set_logger(napi_env env, napi_value exports);
-extern void expose_ziti_connect(napi_env env, napi_value exports);
-extern void expose_get_ziti_service(napi_env env, napi_value exports);
-extern void expose_ziti_shutdown(napi_env env, napi_value exports);
-extern void expose_ziti_write(napi_env env, napi_value exports);
-extern void expose_ziti_https_request(napi_env env, napi_value exports);
-extern void expose_ziti_https_request_data(napi_env env, napi_value exports);
-extern void expose_ziti_https_request_end(napi_env env, napi_value exports);
-extern void expose_ziti_websocket_connect(napi_env env, napi_value exports);
-extern void expose_ziti_websocket_write(napi_env env, napi_value exports);
+extern void expose_zt_close(napi_env env, napi_value exports);
+extern void expose_zt_dial(napi_env env, napi_value exports);
+extern void expose_zt_enroll(napi_env env, napi_value exports);
+extern void expose_zt_sdk_version(napi_env env, napi_value exports);
+extern void expose_zt_init(napi_env env, napi_value exports);
+extern void expose_zt_listen(napi_env env, napi_value exports);
+extern void expose_zt_service_available(napi_env env, napi_value exports);
+extern void expose_zt_services_refresh(napi_env env, napi_value exports);
+extern void expose_zt_set_log_level(napi_env env, napi_value exports);
+extern void expose_zt_set_logger(napi_env env, napi_value exports);
+extern void expose_zt_connect(napi_env env, napi_value exports);
+extern void expose_get_zt_service(napi_env env, napi_value exports);
+extern void expose_zt_shutdown(napi_env env, napi_value exports);
+extern void expose_zt_write(napi_env env, napi_value exports);
+extern void expose_zt_https_request(napi_env env, napi_value exports);
+extern void expose_zt_https_request_data(napi_env env, napi_value exports);
+extern void expose_zt_https_request_end(napi_env env, napi_value exports);
+extern void expose_zt_websocket_connect(napi_env env, napi_value exports);
+extern void expose_zt_websocket_write(napi_env env, napi_value exports);
 
 //
 extern int tlsuv_websocket_init_with_src (uv_loop_t *loop, tlsuv_websocket_t *ws, tlsuv_src_t *src);

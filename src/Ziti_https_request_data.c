@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ziti-nodejs.h"
-#include <ziti/ziti_src.h>
+#include "zt-nodejs.h"
+#include <zt/zt_src.h>
 
 
 /**
@@ -233,7 +233,7 @@ napi_value _Ziti_http_request_data(napi_env env, const napi_callback_info info) 
 }
 
 
-void expose_ziti_https_request_data(napi_env env, napi_value exports) {
+void expose_zt_https_request_data(napi_env env, napi_value exports) {
   napi_status status;
   napi_value fn;
 

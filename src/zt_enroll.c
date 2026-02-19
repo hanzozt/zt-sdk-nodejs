@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ziti-nodejs.h"
+#include "zt-nodejs.h"
 #include <stc/cstr.h>
 /**
  *
@@ -33,7 +33,7 @@ static void EnrollAddonData_drop(EnrollAddonData* data) {
 }
 /**
  * This function is responsible for calling the JavaScript callback function 
- * that was specified when the ziti_enroll(...) was called from JavaScript.
+ * that was specified when the zt_enroll(...) was called from JavaScript.
  */
 static void CallJs_on_enroll(napi_env env, napi_value js_cb, void* context, void* d) {
 
@@ -77,7 +77,7 @@ static void CallJs_on_enroll(napi_env env, napi_value js_cb, void* context, void
 /**
  * 
  */
-void on_ziti_enroll(const ziti_config *cfg, int status, const char *err, void *ctx) {
+void on_zt_enroll(const zt_config *cfg, int status, const char *err, void *ctx) {
   napi_status nstatus;
 
   ZITI_NODEJS_LOG(DEBUG, "\nstatus: %d, \nerr: %s,\nctx: %p", status, err, ctx);
@@ -89,7 +89,7 @@ void on_ziti_enroll(const ziti_config *cfg, int status, const char *err, void *c
   }
   if (cfg != NULL) {
     size_t len;
-    char *output_buf = ziti_config_to_json(cfg, 0, &len);
+    char *output_buf = zt_config_to_json(cfg, 0, &len);
     cstr_assign(&addon_data->config, output_buf);
     free(output_buf);
   }
@@ -111,7 +111,7 @@ static napi_value z_enroll(napi_env env, const napi_callback_info info) {
   napi_value jsRetval;
   napi_valuetype js_cb_type;
 
-  ziti_log_init(thread_loop, ZITI_LOG_DEFAULT_LEVEL, NULL);
+  zt_log_init(thread_loop, ZITI_LOG_DEFAULT_LEVEL, NULL);
 
   ZITI_NODEJS_LOG(DEBUG, "entered");
 
@@ -147,7 +147,7 @@ static napi_value z_enroll(napi_env env, const napi_callback_info info) {
   EnrollAddonData* addon_data = calloc(1, sizeof(*addon_data));
 
   // Create a string to describe this asynchronous operation.
-  NAPI_LITERAL(env, work_name, "N-API on_ziti_enroll");
+  NAPI_LITERAL(env, work_name, "N-API on_zt_enroll");
 
   // Convert the callback retrieved from JavaScript into a thread-safe function (tsfn)
   // which we can call from a worker thread.
@@ -158,14 +158,14 @@ static napi_value z_enroll(napi_env env, const napi_callback_info info) {
                      &(addon_data->tsfn_on_enroll)));
 
   // Initiate the enrollment
-  ziti_enroll_opts opts = {0};
+  zt_enroll_opts opts = {0};
   opts.token = jwt;
-  int rc = ziti_enroll(&opts, thread_loop, on_ziti_enroll, addon_data);
+  int rc = zt_enroll(&opts, thread_loop, on_zt_enroll, addon_data);
   free(jwt);
 
   if (rc != ZITI_OK) {
-    ZITI_NODEJS_LOG(ERROR, "ziti_enroll failed: %d/%s", rc, ziti_errorstr(rc));
-    napi_throw_error(env, NULL, ziti_errorstr(rc)); // does not return
+    ZITI_NODEJS_LOG(ERROR, "zt_enroll failed: %d/%s", rc, zt_errorstr(rc));
+    napi_throw_error(env, NULL, zt_errorstr(rc)); // does not return
     return NULL;
   }
 
@@ -173,4 +173,4 @@ static napi_value z_enroll(napi_env env, const napi_callback_info info) {
   return undefined;
 }
 
-ZNODE_EXPOSE(ziti_enroll, z_enroll)
+ZNODE_EXPOSE(zt_enroll, z_enroll)

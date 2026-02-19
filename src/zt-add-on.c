@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ziti-nodejs.h"
+#include "zt-nodejs.h"
 
 extern void set_signal_handler();
 
@@ -45,34 +45,34 @@ napi_value Init(napi_env env, napi_value exports) {
   strftime(time_str, sizeof(time_str), "%FT%T", start_tm);
 
   ZITI_NODEJS_LOG(INFO, "Ziti NodeJS SDK version %s@%s(%s) starting at (%s.%03d)",
-        ziti_nodejs_get_version(false), ziti_nodejs_git_commit(), ziti_nodejs_git_branch(),
+        zt_nodejs_get_version(false), zt_nodejs_git_commit(), zt_nodejs_git_branch(),
         time_str,
         start_time.tv_usec/1000);
-  ZITI_NODEJS_LOG(DEBUG, "%s", ziti_nodejs_get_version(true));
+  ZITI_NODEJS_LOG(DEBUG, "%s", zt_nodejs_get_version(true));
 
   // Expose some Ziti SDK functions to JavaScript
-  expose_ziti_close(env, exports);
-  expose_ziti_dial(env, exports);
-  expose_ziti_enroll(env, exports);
-  expose_ziti_sdk_version(env, exports);
-  expose_ziti_init(env, exports);
-  expose_ziti_listen(env, exports);
-  expose_ziti_service_available(env, exports);
-  expose_ziti_services_refresh(env, exports);
-  expose_ziti_shutdown(env, exports);
-  expose_ziti_write(env, exports);
+  expose_zt_close(env, exports);
+  expose_zt_dial(env, exports);
+  expose_zt_enroll(env, exports);
+  expose_zt_sdk_version(env, exports);
+  expose_zt_init(env, exports);
+  expose_zt_listen(env, exports);
+  expose_zt_service_available(env, exports);
+  expose_zt_services_refresh(env, exports);
+  expose_zt_shutdown(env, exports);
+  expose_zt_write(env, exports);
 
-  expose_ziti_https_request(env, exports);
-  expose_ziti_https_request_data(env, exports);
-  expose_ziti_https_request_end(env, exports);
+  expose_zt_https_request(env, exports);
+  expose_zt_https_request_data(env, exports);
+  expose_zt_https_request_end(env, exports);
 
-  expose_ziti_websocket_connect(env, exports);
-  expose_ziti_websocket_write(env, exports);
+  expose_zt_websocket_connect(env, exports);
+  expose_zt_websocket_write(env, exports);
 
-  expose_ziti_set_log_level(env, exports);
-  expose_ziti_set_logger(env, exports);
-  expose_ziti_connect(env, exports);
-  expose_get_ziti_service(env, exports);
+  expose_zt_set_log_level(env, exports);
+  expose_zt_set_logger(env, exports);
+  expose_zt_connect(env, exports);
+  expose_get_zt_service(env, exports);
 
   return exports;
 }

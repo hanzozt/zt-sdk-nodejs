@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ziti-nodejs.h"
-#include <ziti/ziti_src.h>
+#include "zt-nodejs.h"
+#include <zt/zt_src.h>
 #include <string.h>
 
 // An item that will be generated here and passed into the JavaScript on_data callback
@@ -30,7 +30,7 @@ static const unsigned int U1 = 1;
 
 /**
  * This function is responsible for calling the JavaScript 'connect' callback function 
- * that was specified when the ziti_dial(...) was called from JavaScript.
+ * that was specified when the zt_dial(...) was called from JavaScript.
  */
 static void CallJs_on_connect(napi_env env, napi_value js_cb, void* context, void* data) {
   napi_status status;
@@ -74,7 +74,7 @@ static void CallJs_on_connect(napi_env env, napi_value js_cb, void* context, voi
 
     ZITI_NODEJS_LOG(INFO, "calling JS callback...");
 
-    // Call the JavaScript function and pass it the ziti_connection
+    // Call the JavaScript function and pass it the zt_connection
     status = napi_call_function(
         env,
         undefined,
@@ -93,7 +93,7 @@ static void CallJs_on_connect(napi_env env, napi_value js_cb, void* context, voi
 
 /**
  * This function is responsible for calling the JavaScript 'data' callback function 
- * that was specified when the ziti_dial(...) was called from JavaScript.
+ * that was specified when the zt_dial(...) was called from JavaScript.
  */
 static void CallJs_on_data(napi_env env, napi_value js_cb, void* context, void* data) {
   napi_status status;
@@ -247,7 +247,7 @@ static void on_ws_read(uv_stream_t *stream, ssize_t status, const uv_buf_t *buf)
  * @param {func}     [3] JS on_data callback;      This is invoked from 'on_ws_read' function above
  * 
  */
-napi_value _ziti_websocket_connect(napi_env env, const napi_callback_info info) {
+napi_value _zt_websocket_connect(napi_env env, const napi_callback_info info) {
 
   napi_status status;
   size_t result;
@@ -416,8 +416,8 @@ napi_value _ziti_websocket_connect(napi_env env, const napi_callback_info info) 
   }
 
   // Crank up the websocket
-  ziti_src_init(thread_loop, &(addon_data->ziti_src), addon_data->service, ztx );
-  tlsuv_websocket_init_with_src(thread_loop, &(addon_data->ws), &(addon_data->ziti_src));
+  zt_src_init(thread_loop, &(addon_data->zt_src), addon_data->service, ztx );
+  tlsuv_websocket_init_with_src(thread_loop, &(addon_data->ws), &(addon_data->zt_src));
 
   // Add Cookies to request
   for (int i = 0; i < (int)addon_data->headers_array_length; i++) {
@@ -429,7 +429,7 @@ napi_value _ziti_websocket_connect(napi_env env, const napi_callback_info info) 
   addon_data->ws.data = addon_data;  // Pass our addon data around so we can eventually find our way back to the JS callback
   rc = tlsuv_websocket_connect(&(addon_data->req), &(addon_data->ws), url, on_connect, on_ws_read);
   if (rc != ZITI_OK) {
-    napi_throw_error(env, NULL, "failure in 'ziti_conn_init");
+    napi_throw_error(env, NULL, "failure in 'zt_conn_init");
   }
 
   return NULL;
@@ -440,18 +440,18 @@ napi_value _ziti_websocket_connect(napi_env env, const napi_callback_info info) 
 /**
  * 
  */
-void expose_ziti_websocket_connect(napi_env env, napi_value exports) {
+void expose_zt_websocket_connect(napi_env env, napi_value exports) {
   napi_status status;
   napi_value fn;
 
-  status = napi_create_function(env, NULL, 0, _ziti_websocket_connect, NULL, &fn);
+  status = napi_create_function(env, NULL, 0, _zt_websocket_connect, NULL, &fn);
   if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to wrap native function '_ziti_websocket_connect");
+    napi_throw_error(env, NULL, "Unable to wrap native function '_zt_websocket_connect");
   }
 
-  status = napi_set_named_property(env, exports, "ziti_websocket_connect", fn);
+  status = napi_set_named_property(env, exports, "zt_websocket_connect", fn);
   if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to populate exports for 'ziti_websocket_connect");
+    napi_throw_error(env, NULL, "Unable to populate exports for 'zt_websocket_connect");
   }
 
 }

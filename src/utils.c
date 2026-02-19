@@ -16,7 +16,7 @@ limitations under the License.
 
 #include <uv.h>
 #include "utils.h"
-#include <ziti/ziti_log.h>
+#include <zt/zt_log.h>
 #include <build_config.h>
 
 
@@ -41,7 +41,7 @@ limitations under the License.
 #define ZITI_COMMIT sha
 #endif
 
-const char* ziti_nodejs_get_version(int verbose) {
+const char* zt_nodejs_get_version(int verbose) {
     if (verbose) {
         return "\n\tVersion:\t" to_str(ZITI_NODEJS_VERSION)
                "\n\tBuild Date:\t" to_str(BUILD_DATE)
@@ -55,11 +55,11 @@ const char* ziti_nodejs_get_version(int verbose) {
     return to_str(ZITI_NODEJS_VERSION);
 }
 
-const char* ziti_nodejs_git_branch() {
+const char* zt_nodejs_git_branch() {
     return to_str(ZITI_BRANCH);
 }
 
-const char* ziti_nodejs_git_commit() {
+const char* zt_nodejs_git_commit() {
     return to_str(ZITI_COMMIT);
 }
 
@@ -75,9 +75,9 @@ void init_nodejs_debug(uv_loop_t *loop) {
     char *level = getenv("ZITI_NODEJS_LOG");
     if (level != NULL) {
         int l = (int) strtol(level, NULL, 10);
-        ziti_log_set_level(l, ZITI_LOG_MODULE);
+        zt_log_set_level(l, ZITI_LOG_MODULE);
     }
-    ziti_log_init(loop, ZITI_LOG_DEFAULT_LEVEL, NULL);
+    zt_log_init(loop, ZITI_LOG_DEFAULT_LEVEL, NULL);
 
 #if _WIN32
 	QueryPerformanceFrequency(&frequency);

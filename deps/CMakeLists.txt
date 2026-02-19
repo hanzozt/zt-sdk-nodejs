@@ -13,13 +13,13 @@ if (WIN32)
 endif (WIN32)
 
 if (ZITI_SDK_DIR)
-    add_subdirectory(${ZITI_SDK_DIR} ${CMAKE_CURRENT_BINARY_DIR}/ziti-sdk)
+    add_subdirectory(${ZITI_SDK_DIR} ${CMAKE_CURRENT_BINARY_DIR}/zt-sdk)
 else (ZITI_SDK_DIR)
-    FetchContent_Declare(ziti
-            GIT_REPOSITORY https://github.com/hanzozt/ziti-sdk-c.git
+    FetchContent_Declare(zt
+            GIT_REPOSITORY https://github.com/hanzozt/zt-sdk-c.git
             GIT_TAG 1.10.9
     )
-    FetchContent_MakeAvailable(ziti)
+    FetchContent_MakeAvailable(zt)
 endif ()
 
 

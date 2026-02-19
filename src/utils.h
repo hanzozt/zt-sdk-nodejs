@@ -25,9 +25,9 @@ limitations under the License.
 extern "C" {
 #endif
 
-extern const char *ziti_nodejs_get_version(int verbose); 
-extern const char *ziti_nodejs_git_branch();
-extern const char *ziti_nodejs_git_commit();
+extern const char *zt_nodejs_get_version(int verbose); 
+extern const char *zt_nodejs_git_branch();
+extern const char *zt_nodejs_git_commit();
 
 extern void init_nodejs_debug(uv_loop_t *loop);
 

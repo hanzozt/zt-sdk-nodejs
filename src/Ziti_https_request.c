@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ziti-nodejs.h"
-#include <ziti/ziti_src.h>
+#include "zt-nodejs.h"
+#include <zt/zt_src.h>
 
 
 /**
@@ -130,8 +130,8 @@ static int purge_and_replace_bad_clients(struct ListMap* clientListMap, HttpsAdd
 
       httpsClient = calloc(1, sizeof *httpsClient);
       httpsClient->scheme_host_port = strdup(addon_data->scheme_host_port);
-      ziti_src_init(thread_loop, &(httpsClient->ziti_src), addon_data->service, ztx );
-      tlsuv_http_init_with_src(thread_loop, &(httpsClient->client), addon_data->scheme_host_port, (tlsuv_src_t *)&(httpsClient->ziti_src) );
+      zt_src_init(thread_loop, &(httpsClient->zt_src), addon_data->service, ztx );
+      tlsuv_http_init_with_src(thread_loop, &(httpsClient->client), addon_data->scheme_host_port, (tlsuv_src_t *)&(httpsClient->zt_src) );
 
       clientListMap->kvPairs[i].value = httpsClient;
 
@@ -173,15 +173,15 @@ static void allocate_client(uv_work_t* req) {
       httpsClient->scheme_host_port = strdup(addon_data->scheme_host_port);
 
       if (addon_data->haveURL) {
-        ZITI_NODEJS_LOG(DEBUG, "URL specified, so pasing NULL to ziti_src_init");
-        ziti_src_init(thread_loop, &(httpsClient->ziti_src), addon_data->service, ztx );
+        ZITI_NODEJS_LOG(DEBUG, "URL specified, so pasing NULL to zt_src_init");
+        zt_src_init(thread_loop, &(httpsClient->zt_src), addon_data->service, ztx );
       } else {
         ZITI_NODEJS_LOG(DEBUG, "addon_data->service is: %s", addon_data->service);
-        ziti_src_init(thread_loop, &(httpsClient->ziti_src), addon_data->service, ztx );
+        zt_src_init(thread_loop, &(httpsClient->zt_src), addon_data->service, ztx );
       }
 
       ZITI_NODEJS_LOG(DEBUG, "addon_data->scheme_host_port is: %s", addon_data->scheme_host_port);
-      tlsuv_http_init_with_src(thread_loop, &(httpsClient->client), addon_data->scheme_host_port, (tlsuv_src_t *)&(httpsClient->ziti_src) );
+      tlsuv_http_init_with_src(thread_loop, &(httpsClient->client), addon_data->scheme_host_port, (tlsuv_src_t *)&(httpsClient->zt_src) );
 
       listMapInsert(clientListMap, addon_data->scheme_host_port, (void*)httpsClient);
 
@@ -1108,7 +1108,7 @@ napi_value _Ziti_http_request(napi_env env, const napi_callback_info info) {
 }
 
 
-void expose_ziti_https_request(napi_env env, napi_value exports) {
+void expose_zt_https_request(napi_env env, napi_value exports) {
   napi_status status;
   napi_value fn;
 

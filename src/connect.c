@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ziti-nodejs.h"
+#include "zt-nodejs.h"
 
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN 1025
 #endif
 
 struct conn_data {
-    ziti_connection conn;
+    zt_connection conn;
     napi_threadsafe_function on_connect;
     int status;
     uv_os_sock_t sock;
@@ -33,7 +33,7 @@ static void on_js_connect(napi_env env, napi_value js_cb, void *ctx, void *data)
     NAPI_GLOBAL(env, glob);
     if (cd->status != ZITI_OK) {
         napi_value msg, err;
-        napi_create_string_utf8(env, ziti_errorstr(cd->status), NAPI_AUTO_LENGTH, &msg);
+        napi_create_string_utf8(env, zt_errorstr(cd->status), NAPI_AUTO_LENGTH, &msg);
         napi_create_error(env, NULL, msg, &err);
         napi_call_function(env, glob, js_cb, 1, &err, NULL);
     } else {
@@ -44,24 +44,24 @@ static void on_js_connect(napi_env env, napi_value js_cb, void *ctx, void *data)
     }
 }
 
-static void on_z_connect(ziti_connection conn, int status) {
-    struct conn_data *cd = ziti_conn_data(conn);
+static void on_z_connect(zt_connection conn, int status) {
+    struct conn_data *cd = zt_conn_data(conn);
     assert(cd);
     assert(cd->conn == conn);
     cd->status = status;
     if (status != ZITI_OK) {
-        ziti_close(conn, NULL);
-        ZITI_NODEJS_LOG(ERROR, "failed to connect: %d/%s", status, ziti_errorstr(status));
+        zt_close(conn, NULL);
+        ZITI_NODEJS_LOG(ERROR, "failed to connect: %d/%s", status, zt_errorstr(status));
     } else {
         uv_os_sock_t pipe[2] = { -1, -1 };
         int uv_rc = uv_socketpair(AF_UNIX, 0, pipe, UV_NONBLOCK_PIPE, UV_NONBLOCK_PIPE);
         if (uv_rc != 0) {
             ZITI_NODEJS_LOG(ERROR, "failed to create socket pair: %d/%s", uv_rc, uv_strerror(uv_rc));
-            ziti_close(conn, NULL);
+            zt_close(conn, NULL);
             cd->status = uv_rc;
             return;
         }
-        ziti_conn_bridge_fds(conn, pipe[1], pipe[1], NULL, NULL);
+        zt_conn_bridge_fds(conn, pipe[1], pipe[1], NULL, NULL);
         cd->sock = pipe[0];
     }
     napi_call_threadsafe_function(cd->on_connect, cd, napi_tsfn_blocking);
@@ -102,13 +102,13 @@ static napi_value z_connect(napi_env env, napi_callback_info info) {
         NAPI_CHECK(env, "get terminator", napi_get_value_string_utf8(env, args[1], terminator, terminator_len + 1, &terminator_len));
     }
 
-    int rc = ziti_conn_init(ztx, &cd->conn, cd);
+    int rc = zt_conn_init(ztx, &cd->conn, cd);
     if (rc == ZITI_OK) {
-        ziti_dial_opts opts = {
+        zt_dial_opts opts = {
                 .identity = terminator,
                 .stream = true,
         };
-        rc = ziti_dial_with_options(cd->conn, service_name, &opts, on_z_connect, NULL);
+        rc = zt_dial_with_options(cd->conn, service_name, &opts, on_z_connect, NULL);
     }
 
     free(service_name);
@@ -116,10 +116,10 @@ static napi_value z_connect(napi_env env, napi_callback_info info) {
 
     if (rc != ZITI_OK) {
         if (cd->conn) {
-            ziti_close(cd->conn, NULL);
+            zt_close(cd->conn, NULL);
         }
         free(cd);
-        napi_throw_error(env, NULL, ziti_errorstr(rc));
+        napi_throw_error(env, NULL, zt_errorstr(rc));
     }
     NAPI_UNDEFINED(env, undefined);
     return undefined;
@@ -141,8 +141,8 @@ static napi_value z_get_service_for_addr(napi_env env, napi_callback_info info) 
     int port = 0;
     NAPI_CHECK(env, "get port", napi_get_value_int32(env, args[2], &port));
 
-    ziti_protocol zitiProtocol = ziti_protocols.value_of(proto);
-    const ziti_service *srv = ziti_service_for_addr_str(ztx, zitiProtocol, host, port);
+    zt_protocol ztProtocol = zt_protocols.value_of(proto);
+    const zt_service *srv = zt_service_for_addr_str(ztx, ztProtocol, host, port);
     if (srv == NULL) {
         NAPI_UNDEFINED(env, undefined);
         return undefined;
@@ -153,5 +153,5 @@ static napi_value z_get_service_for_addr(napi_env env, napi_callback_info info) 
     return service_name;
 }
 
-ZNODE_EXPOSE(get_ziti_service, z_get_service_for_addr)
-ZNODE_EXPOSE(ziti_connect, z_connect)
+ZNODE_EXPOSE(get_zt_service, z_get_service_for_addr)
+ZNODE_EXPOSE(zt_connect, z_connect)

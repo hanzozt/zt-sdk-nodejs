@@ -3,29 +3,29 @@ var binary = require('@mapbox/node-pre-gyp');
 var path = require('path')
 var binding_path = binary.find(path.resolve(path.join(__dirname,'../package.json')), {debug: true});
 // var binding_path = binary.find(path.resolve(path.join(__dirname,'../package.json')));
-var ziti = require(binding_path);
-require('assert').equal(ziti.ziti_hello(),"ziti");
+var zt = require(binding_path);
+require('assert').equal(zt.zt_hello(),"zt");
 
 
 
-const do_ziti_websocket_connect = async (url) => {
+const do_zt_websocket_connect = async (url) => {
     return new Promise((resolve, reject) => {
         try {
 
             console.log('----------- url (%o)', url);
 
-            let rc = ziti.ziti_websocket_connect(
+            let rc = zt.zt_websocket_connect(
                 url,
 
                 // on_connect callback
                 (ws) => {
-                    console.log('----------- Now inside ziti_websocket_connect on_connect callback ----------, ws is: %o', ws);
+                    console.log('----------- Now inside zt_websocket_connect on_connect callback ----------, ws is: %o', ws);
                     resolve(ws);
                 },
 
                 // on_data callback
                 (obj) => {
-                    console.log('----------- Now inside ziti_websocket_connect on_data callback ----------, obj is: \n%o', obj);
+                    console.log('----------- Now inside zt_websocket_connect on_data callback ----------, obj is: \n%o', obj);
                     console.log('----------- obj.body is: \n%o', obj.body.toString());
                 },
             );
@@ -41,19 +41,19 @@ const do_ziti_websocket_connect = async (url) => {
 }
 
 
-const do_ziti_websocket_write = async (ws, buffer) => {
+const do_zt_websocket_write = async (ws, buffer) => {
     return new Promise((resolve, reject) => {
         try {
 
             console.log('----------- ws (%o)', ws);
 
-            let rc = ziti.ziti_websocket_write(
+            let rc = zt.zt_websocket_write(
                 ws,
                 buffer,
 
                 // on_write callback
                 (obj) => {
-                    console.log('----------- Now inside ziti_websocket_write on_write callback ----------, obj is: %o', obj);
+                    console.log('----------- Now inside zt_websocket_write on_write callback ----------, obj is: %o', obj);
                     resolve(obj);
                 },
 
@@ -69,7 +69,7 @@ const do_ziti_websocket_write = async (ws, buffer) => {
 
 const NF_init = async () => {
     return new Promise((resolve) => {
-        ziti.ziti_init(process.argv[2], () => {
+        zt.zt_init(process.argv[2], () => {
             resolve();
         });
     });
@@ -98,21 +98,21 @@ const spin = () => {
     await NF_init();
 
 
-    let ws = await do_ziti_websocket_connect(url).catch((err) => {
-        console.log('----------- do_ziti_websocket_connect failed with error (%o)', err);
+    let ws = await do_zt_websocket_connect(url).catch((err) => {
+        console.log('----------- do_zt_websocket_connect failed with error (%o)', err);
         process.exit(-1);
     });
 
-    console.log('----------- do_ziti_websocket_connect() returned, ws is (%o)', ws);
+    console.log('----------- do_zt_websocket_connect() returned, ws is (%o)', ws);
 
     let buffer = Buffer.from("this is some data");
 
-    let obj = await do_ziti_websocket_write(ws, buffer).catch((err) => {
-        console.log('----------- do_ziti_websocket_write failed with error (%o)', err);
+    let obj = await do_zt_websocket_write(ws, buffer).catch((err) => {
+        console.log('----------- do_zt_websocket_write failed with error (%o)', err);
         process.exit(-1);
     });
 
-    console.log('----------- do_ziti_websocket_write() returned, obj is (%o)', obj);
+    console.log('----------- do_zt_websocket_write() returned, obj is (%o)', obj);
 
     spin();
 

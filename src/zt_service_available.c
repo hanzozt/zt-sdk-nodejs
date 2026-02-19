@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ziti-nodejs.h"
+#include "zt-nodejs.h"
 #include <time.h> 
 
 
@@ -32,7 +32,7 @@ typedef struct ServiceAvailableItem {
 
 /**
  * This function is responsible for calling the JavaScript 'service_available' callback function 
- * that was specified when the ziti_service_available(...) was called from JavaScript.
+ * that was specified when the zt_service_available(...) was called from JavaScript.
  */
 static void CallJs_on_service_available(napi_env env, napi_value js_cb, void* context, void* data) {
   napi_status status;
@@ -103,7 +103,7 @@ static void CallJs_on_service_available(napi_env env, napi_value js_cb, void* co
 /**
  * 
  */
-static void on_service_available(ziti_context nf_ctx, const ziti_service* service, int status, void *ctx) {
+static void on_service_available(zt_context nf_ctx, const zt_service* service, int status, void *ctx) {
   napi_status nstatus;
 
   AddonData* addon_data = (AddonData*)ctx;
@@ -130,7 +130,7 @@ static void on_service_available(ziti_context nf_ctx, const ziti_service* servic
 /**
  * 
  */
-napi_value _ziti_service_available(napi_env env, const napi_callback_info info) {
+napi_value _zt_service_available(napi_env env, const napi_callback_info info) {
   napi_status status;
   size_t argc = 2;
   napi_value args[2];
@@ -188,7 +188,7 @@ napi_value _ziti_service_available(napi_env env, const napi_callback_info info) 
   }
 
   // Now, call the C-SDK to see if the service name is present
-  ziti_service_available(ztx, ServiceName, on_service_available, addon_data);
+  zt_service_available(ztx, ServiceName, on_service_available, addon_data);
 
   status = napi_create_int32(env, 0 /* always succeed here, it is the cb that tells the real tale */, &jsRetval);
   if (status != napi_ok) {
@@ -204,18 +204,18 @@ napi_value _ziti_service_available(napi_env env, const napi_callback_info info) 
 /**
  * 
  */
-void expose_ziti_service_available(napi_env env, napi_value exports) {
+void expose_zt_service_available(napi_env env, napi_value exports) {
   napi_status status;
   napi_value fn;
 
-  status = napi_create_function(env, NULL, 0, _ziti_service_available, NULL, &fn);
+  status = napi_create_function(env, NULL, 0, _zt_service_available, NULL, &fn);
   if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to wrap native function '_ziti_service_available");
+    napi_throw_error(env, NULL, "Unable to wrap native function '_zt_service_available");
   }
 
-  status = napi_set_named_property(env, exports, "ziti_service_available", fn);
+  status = napi_set_named_property(env, exports, "zt_service_available", fn);
   if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to populate exports for 'ziti_service_available");
+    napi_throw_error(env, NULL, "Unable to populate exports for 'zt_service_available");
   }
 
 }

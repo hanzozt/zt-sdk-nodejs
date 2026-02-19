@@ -1,4 +1,4 @@
-![Ziggy using the ziti-sdk-nodejs](https://raw.githubusercontent.com/hanzozt/branding/main/images/banners/Node.jpg)
+![Ziggy using the zt-sdk-nodejs](https://raw.githubusercontent.com/hanzozt/branding/main/images/banners/Node.jpg)
 
 <p align="center" width="100%">
 Hanzo ZT is a free and open source project focused on bringing zero trust to any application.
@@ -8,18 +8,18 @@ The project provides all the pieces required to implement or integrate zero trus
 <br/>
 Please star us.
 <br/>
-<a href="https://github.com/hanzozt/ziti/stargazers"><img src="https://img.shields.io/github/stars/hanzozt/ziti?style=flat" ></a>
+<a href="https://github.com/hanzozt/zt/stargazers"><img src="https://img.shields.io/github/stars/hanzozt/zt?style=flat" ></a>
 <br/>
      <br>
 </p>
 
 <p align="center" width="100%">
-<a href="https://hanzozt.dev"><img src="ziti.png" width="100"></a>
+<a href="https://hanzozt.dev"><img src="zt.png" width="100"></a>
 </p>
 
 <p align="center">
     <b>
-    <a>@hanzozt/ziti-sdk-nodejs</a>
+    <a>@hanzozt/zt-sdk-nodejs</a>
     <br>
     <br>
     <b>
@@ -38,11 +38,11 @@ Please star us.
     </p>
 
 ---
-[![Build Status](https://github.com/hanzozt/ziti-sdk-nodejs/workflows/Build/badge.svg?branch=main)]()
-[![Issues](https://img.shields.io/github/issues-raw/hanzozt/ziti-sdk-nodejs)]()
-[![npm version](https://badge.fury.io/js/@hanzozt%2Fziti-sdk-nodejs.svg)](https://badge.fury.io/js/@hanzozt%2Fziti-sdk-nodejs.svg)
+[![Build Status](https://github.com/hanzozt/zt-sdk-nodejs/workflows/Build/badge.svg?branch=main)]()
+[![Issues](https://img.shields.io/github/issues-raw/hanzozt/zt-sdk-nodejs)]()
+[![npm version](https://badge.fury.io/js/@hanzozt%2Fzt-sdk-nodejs.svg)](https://badge.fury.io/js/@hanzozt%2Fzt-sdk-nodejs.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![LOC](https://img.shields.io/tokei/lines/github/hanzozt/ziti-sdk-nodejs)]()
+[![LOC](https://img.shields.io/tokei/lines/github/hanzozt/zt-sdk-nodejs)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=rounded)](CONTRIBUTING.md)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
@@ -56,17 +56,17 @@ For more context on this SDK, you may be interested in this
 
 # Supported platforms
 
-The `@hanzozt/ziti-sdk-nodejs` module works with the following Node.js versions:
+The `@hanzozt/zt-sdk-nodejs` module works with the following Node.js versions:
 - v20.x 
 - v22.x
 - v24.x
 - v25.x
 
-The `@hanzozt/ziti-sdk-nodejs` module works with the following architectures:
+The `@hanzozt/zt-sdk-nodejs` module works with the following architectures:
 - amd64
 - arm64
 
-The `@hanzozt/ziti-sdk-nodejs` module works with the following Operating Systems:
+The `@hanzozt/zt-sdk-nodejs` module works with the following Operating Systems:
 - macos
 - linux
 - windows
@@ -76,20 +76,20 @@ The `@hanzozt/ziti-sdk-nodejs` module works with the following Operating Systems
 
 NPM
 ``` js
-npm i @hanzozt/ziti-sdk-nodejs
+npm i @hanzozt/zt-sdk-nodejs
 ```
 or Yarn
 ``` js
-yarn add @hanzozt/ziti-sdk-nodejs
+yarn add @hanzozt/zt-sdk-nodejs
 ```
 
 Special note on previous package:
 
-On June 7, 2020 @hanzozt/ziti-sdk-nodejs@0.6.0 was released. Older, unscoped versions that are not part of the @hanzozt org are deprecated and only @hanzozt/ziti-sdk-nodejs will see updates going forward. To upgrade to the new package do:
+On June 7, 2020 @hanzozt/zt-sdk-nodejs@0.6.0 was released. Older, unscoped versions that are not part of the @hanzozt org are deprecated and only @hanzozt/zt-sdk-nodejs will see updates going forward. To upgrade to the new package do:
 
 ``` js
-npm uninstall ziti-sdk-nodejs --save
-npm install @hanzozt/ziti-sdk-nodejs --save
+npm uninstall zt-sdk-nodejs --save
+npm install @hanzozt/zt-sdk-nodejs --save
 ```
 
 # Usage
@@ -98,19 +98,19 @@ npm install @hanzozt/ziti-sdk-nodejs --save
 
 ESM example (client-side)
 ``` js
-import ziti from '@hanzozt/ziti-sdk-nodejs';
+import zt from '@hanzozt/zt-sdk-nodejs';
 
 // Somehow provide path to identity file, e.g. via env var
-const zitiIdentityFile  = process.env.ZITI_IDENTITY_FILE;
+const ztIdentityFile  = process.env.ZITI_IDENTITY_FILE;
 // Authenticate ourselves onto the Ziti network
-await ziti.init( zitiIdentityFile ).catch(( err ) => { /* probably exit */ });
+await zt.init( ztIdentityFile ).catch(( err ) => { /* probably exit */ });
 
 const on_resp_data = ( obj ) => {
     console.log(`response is: ${obj.body.toString('utf8')}`);
 };
 
 // Perform an HTTP GET request to a dark Hanzo ZT web service
-ziti.httpRequest(
+zt.httpRequest(
   'myDarkWebService',            // Hanzo ZT Service name or HTTP origin part of the URL
   undefined,                     // schemeHostPort parm is mutually-exclusive with serviceName parm
   'GET',
@@ -125,16 +125,16 @@ ziti.httpRequest(
 
 ESM example (server-side ExpressJS)
 ``` js
-import ziti from '@hanzozt/ziti-sdk-nodejs';
+import zt from '@hanzozt/zt-sdk-nodejs';
 import express from 'express';
-let app = ziti.express( express, zitiServiceName );
+let app = zt.express( express, ztServiceName );
 app.listen(ignored, function() { ... }
 
 /**
 
 That's right.
 
-With only a single-line code change (the ziti.express call), your web server is now capable
+With only a single-line code change (the zt.express call), your web server is now capable
 of being invisible to malicious attackers on the internet, and only accessible to your 
 trusted remote users.
 
@@ -151,27 +151,27 @@ No malicious actors can see your dark web server, and thus, no malicious actors 
 
 CJS example (client-side)
 ``` js
-var ziti = require('@hanzozt/ziti-sdk-nodejs');
+var zt = require('@hanzozt/zt-sdk-nodejs');
 
-const ziti_init = async (identity) => {
+const zt_init = async (identity) => {
     return new Promise((resolve) => {
-        ziti.ziti_init(identity, () => {
+        zt.zt_init(identity, () => {
             resolve();
         });
     });
 };
 
-const ziti_service_available = (service) => {
+const zt_service_available = (service) => {
     return new Promise((resolve) => {
-        ziti.ziti_service_available(service, (status) => {
+        zt.zt_service_available(service, (status) => {
             resolve(status);
         });
     });
 };
 
-function ziti_dial(service) {
+function zt_dial(service) {
     return new Promise((resolve, reject) => {
-        ziti.ziti_dial(
+        zt.zt_dial(
             service,
             (conn) => {
                 resolve(conn);
@@ -183,9 +183,9 @@ function ziti_dial(service) {
     });
 }
 
-const ziti_write = (conn, data) => {
+const zt_write = (conn, data) => {
     return new Promise((resolve) => {
-        ziti.ziti_write(conn, data, () => {
+        zt.zt_write(conn, data, () => {
             resolve();
         });
     });
@@ -193,19 +193,19 @@ const ziti_write = (conn, data) => {
 
 (async () => {
 
-    await ziti_init(LOCATION_OF_IDENTITY_FILE);
+    await zt_init(LOCATION_OF_IDENTITY_FILE);
 
-    let status = await ziti_service_available(YOUR_SERVICE_NAME);
+    let status = await zt_service_available(YOUR_SERVICE_NAME);
 
     if (status === 0) {
 
-        const conn = await ziti_dial(YOUR_SERVICE_NAME);
+        const conn = await zt_dial(YOUR_SERVICE_NAME);
 
         let data = SOME_KIND_OF_DATA;
 
         let buffer = Buffer.from(data);
 
-        await ziti_write(conn, buffer);
+        await zt_write(conn, buffer);
 
         ...etc
     }
@@ -220,10 +220,10 @@ For doc concerning API's contained in this SDK, you may be interested in this
 
 Getting Help
 ------------
-Please use these community resources for getting help. We use GitHub [issues](https://github.com/hanzozt/ziti-sdk-nodejs/issues) 
+Please use these community resources for getting help. We use GitHub [issues](https://github.com/hanzozt/zt-sdk-nodejs/issues) 
 for tracking bugs and feature requests and have limited bandwidth to address them.
 
-- Read the [docs](https://hanzozt.github.io/ziti/overview.html)
+- Read the [docs](https://hanzozt.github.io/zt/overview.html)
 - Participate in discussion on [Discourse](https://community.hanzozt.dev/)
 
 
@@ -236,8 +236,8 @@ export VCPKG_ROOT=`pwd`/vcpkg
 brew install cmake
 brew install ninja
 brew install pkg-config
-git clone https://github.com/hanzozt/ziti-sdk-nodejs.git
-cd ziti-sdk-nodejs
+git clone https://github.com/hanzozt/zt-sdk-nodejs.git
+cd zt-sdk-nodejs
 npm run build
 ```
 

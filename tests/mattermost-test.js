@@ -2,15 +2,15 @@
 var binary = require('@mapbox/node-pre-gyp');
 var path = require('path')
 var binding_path = binary.find(path.resolve(path.join(__dirname,'../package.json')));
-var ziti = require(binding_path);
-require('assert').equal(ziti.ziti_hello(),"ziti");
+var zt = require(binding_path);
+require('assert').equal(zt.zt_hello(),"zt");
 
 
 
 function NF_dial(service) {
     console.log('----------- inside NF_dial() ---------- service is: ', service);
     return new Promise((resolve, reject) => {
-        ziti.ziti_dial(
+        zt.zt_dial(
         service,
         false, // NOT a wabsocket
         (conn) => {
@@ -29,7 +29,7 @@ const delay = (ms, value) => new Promise(resolve => setTimeout(resolve, ms, valu
 
 const NF_init = async () => {
     return new Promise((resolve) => {
-        ziti.ziti_init(process.argv[2], () => {
+        zt.zt_init(process.argv[2], () => {
             resolve();
         });
     });
@@ -37,7 +37,7 @@ const NF_init = async () => {
 
 const NF_service_available = (service) => {
     return new Promise((resolve) => {
-        ziti.ziti_service_available(service, (status) => {
+        zt.zt_service_available(service, (status) => {
             resolve(status);
         });
     });
@@ -45,7 +45,7 @@ const NF_service_available = (service) => {
 
 const NF_write = (conn, data) => {
     return new Promise((resolve) => {
-        ziti.ziti_write(conn, data, () => {
+        zt.zt_write(conn, data, () => {
             resolve();
         });
     });
@@ -83,11 +83,11 @@ function NF_dial_connect_callback(conn) {
         "HTTP/1.1\r\n" +
         "Accept: */*\r\n" +
         "Connection: keep-alive\r\n" +
-        "Host: mattermost.ziti.netfoundry.io\r\n" +
+        "Host: mattermost.zt.netfoundry.io\r\n" +
         "User-Agent: curl/7.54.0\r\n" +
         "\r\n";
 
-    ziti.ziti_write(
+    zt.zt_write(
         conn, 
         data, 
         NF_write_callback
@@ -102,16 +102,16 @@ function NF_dial_data_callback(data) {
 
     await NF_init();
 
-    let status = await NF_service_available('mattermost.ziti.netfoundry.io');
+    let status = await NF_service_available('mattermost.zt.netfoundry.io');
 
-    let conn = await NF_dial('mattermost.ziti.netfoundry.io');
+    let conn = await NF_dial('mattermost.zt.netfoundry.io');
 
     let data = 
         "GET / " +
         "HTTP/1.1\r\n" +
         "Accept: */*\r\n" +
         "Connection: keep-alive\r\n" +
-        "Host: mattermost.ziti.netfoundry.io\r\n" +
+        "Host: mattermost.zt.netfoundry.io\r\n" +
         "User-Agent: curl/7.54.0\r\n" +
         "\r\n";
 

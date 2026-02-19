@@ -39,9 +39,9 @@ on windows: gcc -g stack_traces.c -limagehlp
 #   include <execinfo.h>
 #endif
 
-#include <ziti/ziti.h>
+#include <zt/zt.h>
 
-static char const * icky_global_program_name = "ziti-nodejs";
+static char const * icky_global_program_name = "zt-nodejs";
 
 
 /**

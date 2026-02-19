@@ -6,7 +6,7 @@ include(cmake/variables.cmake)
 
 message(NOTICE "branch: ${ZITI_BRANCH}/${ZITI_COMMIT}")
 
-project (ziti_sdk_nodejs)
+project (zt_sdk_nodejs)
 
 configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/build_config.h.in
@@ -36,7 +36,7 @@ target_include_directories(${PROJECT_NAME}
 )
 
 target_compile_definitions(${PROJECT_NAME}
-        PRIVATE ZITI_LOG_MODULE="ziti-njs"
+        PRIVATE ZITI_LOG_MODULE="zt-njs"
 )
 
 if (WIN32)
@@ -51,7 +51,7 @@ endif()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ziti ${CMAKE_JS_LIB})
+target_link_libraries(${PROJECT_NAME} PRIVATE zt ${CMAKE_JS_LIB})
 if (WIN32)
   target_link_libraries(${PROJECT_NAME} PRIVATE dbghelp version ntdll)
 endif (WIN32)

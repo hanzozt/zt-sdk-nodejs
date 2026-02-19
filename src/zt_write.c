@@ -14,28 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ziti-nodejs.h"
+#include "zt-nodejs.h"
 #include <string.h>
 
+
 // An item that will be generated here and passed into the JavaScript write callback
-typedef struct WSWriteItem {
-  tlsuv_websocket_t *ws;
+typedef struct WriteItem {
+  zt_connection conn;
   ssize_t status;
-} WSWriteItem;
+} WriteItem;
 
 
 /**
  * This function is responsible for calling the JavaScript 'write' callback function 
- * that was specified when the ziti_write(...) was called from JavaScript.
+ * that was specified when the zt_write(...) was called from JavaScript.
  */
 static void CallJs_on_write(napi_env env, napi_value js_cb, void* context, void* data) {
   napi_status status;
+
+  ZITI_NODEJS_LOG(DEBUG, "CallJs_on_write entered");
 
   // This parameter is not used.
   (void) context;
 
   // Retrieve the WriteItem created by the worker thread.
-  WSWriteItem* item = (WSWriteItem*)data;
+  WriteItem* item = (WriteItem*)data;
 
   // env and js_cb may both be NULL if Node.js is in its cleanup phase, and
   // items are left over from earlier thread-safe calls from the worker thread.
@@ -46,25 +49,25 @@ static void CallJs_on_write(napi_env env, napi_value js_cb, void* context, void*
     napi_value undefined;
 
     // const obj = {}
-    napi_value js_write_item, js_ws, js_status;
+    napi_value js_write_item, js_conn, js_status;
     status = napi_create_object(env, &js_write_item);
     if (status != napi_ok) {
       napi_throw_error(env, NULL, "Unable to napi_create_object");
     }
 
-    // obj.ws = ws
-    ZITI_NODEJS_LOG(DEBUG, "ws=%p", item->ws);
-    status = napi_create_int64(env, (int64_t)item->ws, &js_ws);
+    // obj.conn = conn
+    ZITI_NODEJS_LOG(DEBUG, "conn=%p", item->conn);
+    status = napi_create_int64(env, (int64_t)item->conn, &js_conn);
     if (status != napi_ok) {
       napi_throw_error(env, NULL, "Unable to napi_create_int64");
     }
-    status = napi_set_named_property(env, js_write_item, "ws", js_ws);
+    status = napi_set_named_property(env, js_write_item, "conn", js_conn);
     if (status != napi_ok) {
       napi_throw_error(env, NULL, "Unable to napi_set_named_property");
     }
 
     // obj.status = status
-    ZITI_NODEJS_LOG(DEBUG, "status=%zd", item->status);
+    ZITI_NODEJS_LOG(DEBUG, "status=%zo", item->status);
     status = napi_create_int64(env, (int64_t)item->status, &js_status);
     if (status != napi_ok) {
       napi_throw_error(env, NULL, "Unable to napi_create_int64");
@@ -101,15 +104,14 @@ static void CallJs_on_write(napi_env env, napi_value js_cb, void* context, void*
 /**
  * 
  */
-static void on_write(uv_write_t *req, int status) {
-  ZITI_NODEJS_LOG(DEBUG, "=========ws_write_cb: req: %p, status: %d", req, status);
+static void on_write(zt_connection conn, ssize_t status, void *ctx) {
 
-  WSAddonData* addon_data = (WSAddonData*) req->data;
+  ConnAddonData* addon_data = (ConnAddonData*) zt_conn_data(conn);
 
-  free(req);
+  ZITI_NODEJS_LOG(DEBUG, "on_write cb entered: addon_data: %p", addon_data);
 
-  WSWriteItem* item = memset(malloc(sizeof(*item)), 0, sizeof(*item));
-  item->ws = &(addon_data->ws);
+  WriteItem* item = memset(malloc(sizeof(*item)), 0, sizeof(*item));
+  item->conn = conn;
   item->status = status;
 
   // Initiate the call into the JavaScript callback. 
@@ -122,14 +124,13 @@ static void on_write(uv_write_t *req, int status) {
   if (nstatus != napi_ok) {
     ZITI_NODEJS_LOG(ERROR, "Unable to napi_call_threadsafe_function");
   }
-
 }
 
 
 /**
  * 
  */
-napi_value _ziti_websocket_write(napi_env env, const napi_callback_info info) {
+napi_value _zt_write(napi_env env, const napi_callback_info info) {
   napi_status status;
   size_t argc = 3;
   napi_value args[3];
@@ -143,17 +144,15 @@ napi_value _ziti_websocket_write(napi_env env, const napi_callback_info info) {
     return NULL;
   }
 
-  // Obtain websocket
-  int64_t js_ws;
-  status = napi_get_value_int64(env, args[0], &js_ws);
+  // Obtain zt_connection
+  int64_t js_conn;
+  status = napi_get_value_int64(env, args[0], &js_conn);
   if (status != napi_ok) {
     napi_throw_error(env, NULL, "Failed to get Conn");
   }
-  tlsuv_websocket_t *ws = (tlsuv_websocket_t*)js_ws;
-  ZITI_NODEJS_LOG(DEBUG, "========= ws: %p", ws);
+  zt_connection conn = (zt_connection)js_conn;
 
-  WSAddonData* addon_data = (WSAddonData*) ws->data;
-  ZITI_NODEJS_LOG(DEBUG, "========= &(addon_data->ws): %p", &(addon_data->ws));
+  ConnAddonData* addon_data = (ConnAddonData*) zt_conn_data(conn);
 
   // Obtain data to write (we expect a Buffer)
   void*  buffer;
@@ -164,11 +163,13 @@ napi_value _ziti_websocket_write(napi_env env, const napi_callback_info info) {
   }
 
   // Since the underlying Buffer's lifetime is not guaranteed if it's managed by the VM, we will copy the chunk into our heap
-  void* chunk = memset(malloc(bufferLength + 1), 0, bufferLength + 1);
+  void* chunk = memset(malloc(bufferLength), 0, bufferLength);
   memcpy(chunk, buffer, bufferLength);
 
   // Obtain ptr to JS 'write' callback function
   napi_value js_write_cb = args[2];
+  ZITI_NODEJS_LOG(DEBUG, "js_write_cb: %p", js_write_cb);
+
   napi_value work_name;
 
   // Create a string to describe this asynchronous operation.
@@ -199,15 +200,10 @@ napi_value _ziti_websocket_write(napi_env env, const napi_callback_info info) {
     napi_throw_error(env, NULL, "Failed to napi_create_threadsafe_function");
   }
 
-  // Now, call the C-SDK to actually write the data over the websocket
-
-  uv_write_t *wr = malloc(sizeof(uv_write_t));
-  wr->data = addon_data;
-  uv_buf_t b;
-  b.base = chunk;
-  b.len = bufferLength;
-
-  tlsuv_websocket_write(wr, &(addon_data->ws), &b, on_write);
+  // Now, call the C-SDK to actually write the data over to the service
+  ZITI_NODEJS_LOG(DEBUG, "call zt_write");
+  zt_write(conn, chunk, bufferLength, on_write, NULL);
+  ZITI_NODEJS_LOG(DEBUG, "back from zt_write");
 
   return NULL;
 }
@@ -217,18 +213,18 @@ napi_value _ziti_websocket_write(napi_env env, const napi_callback_info info) {
 /**
  * 
  */
-void expose_ziti_websocket_write(napi_env env, napi_value exports) {
+void expose_zt_write(napi_env env, napi_value exports) {
   napi_status status;
   napi_value fn;
 
-  status = napi_create_function(env, NULL, 0, _ziti_websocket_write, NULL, &fn);
+  status = napi_create_function(env, NULL, 0, _zt_write, NULL, &fn);
   if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to wrap native function '_ziti_websocket_write");
+    napi_throw_error(env, NULL, "Unable to wrap native function '_zt_write");
   }
 
-  status = napi_set_named_property(env, exports, "ziti_websocket_write", fn);
+  status = napi_set_named_property(env, exports, "zt_write", fn);
   if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to populate exports for 'ziti_websocket_write");
+    napi_throw_error(env, NULL, "Unable to populate exports for 'zt_write");
   }
 
 }

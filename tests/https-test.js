@@ -3,8 +3,8 @@ var binary = require('@mapbox/node-pre-gyp');
 var path = require('path')
 // var binding_path = binary.find(path.resolve(path.join(__dirname,'../package.json')), {debug: true});
 var binding_path = binary.find(path.resolve(path.join(__dirname,'../package.json')));
-var ziti = require(binding_path);
-require('assert').equal(ziti.ziti_hello(),"ziti");
+var zt = require(binding_path);
+require('assert').equal(zt.zt_hello(),"zt");
 
 
 
@@ -14,7 +14,7 @@ const Ziti_http_request = async (url, method, headers) => {
 
             console.log('headers (%o)', headers);
 
-            let req = ziti.Ziti_http_request(
+            let req = zt.Ziti_http_request(
                 url,
                 method,
                 headers,
@@ -48,7 +48,7 @@ const Ziti_http_request = async (url, method, headers) => {
 
 const Ziti_http_request_data = async (req, buffer) => {
     return new Promise((resolve, reject) => {
-        ziti.Ziti_http_request_data(
+        zt.Ziti_http_request_data(
             req,
             buffer,
             // on_req_data callback
@@ -62,7 +62,7 @@ const Ziti_http_request_data = async (req, buffer) => {
 
 const NF_init = async () => {
     return new Promise((resolve) => {
-        ziti.ziti_init(process.argv[2], () => {
+        zt.zt_init(process.argv[2], () => {
             resolve();
         });
     });
@@ -100,7 +100,7 @@ let chunkBody = process.argv[5];
 
 //         } else {
 //             console.log("======== calling Ziti_http_request_end");
-//             ziti.Ziti_http_request_end( req );
+//             zt.Ziti_http_request_end( req );
 //         }
 //     }, 500, req);
 // }
@@ -156,7 +156,7 @@ const sendChunk = (req) => {
 
         console.log('========================================================================================================');
         console.log('======================================== Ziti_http_request_end called ==================================');
-        ziti.Ziti_http_request_end( req );
+        zt.Ziti_http_request_end( req );
         console.log('========================================================================================================');
 
     } else {
@@ -196,7 +196,7 @@ const sendChunk = (req) => {
 
         // console.log('========================================================================================================');
         // console.log('======================================== Ziti_http_request_end called ==================================');
-        // ziti.Ziti_http_request_end( req );
+        // zt.Ziti_http_request_end( req );
         // console.log('========================================================================================================');
 
 

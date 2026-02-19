@@ -1,8 +1,8 @@
-import ziti from '../ziti.js';
+import zt from '../zt.js';
 import http from 'node:http';
 
 // Usage node http-get.mjs <identity.json> <url>
-// <url> can be a Ziti service intercept (e.g. http://myserver.ziti:8080) or http://<service-name> (port does not matter)
+// <url> can be a Ziti service intercept (e.g. http://myserver.zt:8080) or http://<service-name> (port does not matter)
 const IDENTITY_FILE = process.argv[2];
 const URL    = process.argv[3];
 
@@ -12,11 +12,11 @@ if (!IDENTITY_FILE) {
 }
 
 console.log('Initializing...');
-await ziti.init(IDENTITY_FILE);
+await zt.init(IDENTITY_FILE);
 console.log('Init done');
 
 http.get(URL,
-    { agent: ziti.httpAgent() },
+    { agent: zt.httpAgent() },
     (res) => {
         console.log(`HTTP status code: ${res.statusCode} ${res.statusMessage}`);
         for (const k in res.headers) {
@@ -25,5 +25,5 @@ http.get(URL,
         }
         res.on('data', (chunk) => {
             console.log('Received body chunk:', chunk.toString());
-        }).on('end', ziti.ziti_shutdown)
+        }).on('end', zt.zt_shutdown)
     });

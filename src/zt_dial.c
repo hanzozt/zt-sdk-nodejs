@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ziti-nodejs.h"
+#include "zt-nodejs.h"
 #include <string.h>
 
 // An item that will be generated here and passed into the JavaScript on_data callback
@@ -27,7 +27,7 @@ typedef struct OnDataItem {
 
 /**
  * This function is responsible for calling the JavaScript 'connect' callback function 
- * that was specified when the ziti_dial(...) was called from JavaScript.
+ * that was specified when the zt_dial(...) was called from JavaScript.
  */
 static void CallJs_on_connect(napi_env env, napi_value js_cb, void* context, void* data) {
   napi_status status;
@@ -43,10 +43,10 @@ static void CallJs_on_connect(napi_env env, napi_value js_cb, void* context, voi
 
     ZITI_NODEJS_LOG(INFO, "data: %p", data);
 
-    // Convert the ziti_connection to a napi_value.
+    // Convert the zt_connection to a napi_value.
     if (NULL != data) {
-      // Retrieve the ziti_connection from the item created by the worker thread.
-      ziti_connection conn = *(ziti_connection*)data;
+      // Retrieve the zt_connection from the item created by the worker thread.
+      zt_connection conn = *(zt_connection*)data;
       status = napi_create_int64(env, (int64_t)conn, &js_conn);
       if (status != napi_ok) {
         napi_throw_error(env, NULL, "Unable to napi_create_int64");
@@ -67,7 +67,7 @@ static void CallJs_on_connect(napi_env env, napi_value js_cb, void* context, voi
 
     ZITI_NODEJS_LOG(INFO, "calling JS callback...");
 
-    // Call the JavaScript function and pass it the ziti_connection
+    // Call the JavaScript function and pass it the zt_connection
     status = napi_call_function(
         env,
         undefined,
@@ -86,7 +86,7 @@ static void CallJs_on_connect(napi_env env, napi_value js_cb, void* context, voi
 
 /**
  * This function is responsible for calling the JavaScript 'data' callback function 
- * that was specified when the ziti_dial(...) was called from JavaScript.
+ * that was specified when the zt_dial(...) was called from JavaScript.
  */
 static void CallJs_on_data(napi_env env, napi_value js_cb, void* context, void* data) {
   napi_status status;
@@ -142,24 +142,24 @@ static void CallJs_on_data(napi_env env, napi_value js_cb, void* context, void* 
 /**
  * This function is the callback invoked by the C-SDK when data arrives on the connection.
  */
-long on_data(struct ziti_conn *conn, const unsigned char *buf, long len) {
+long on_data(struct zt_conn *conn, const unsigned char *buf, long len) {
   napi_status status;
 
-  ConnAddonData* addon_data = (ConnAddonData*) ziti_conn_data(conn);
+  ConnAddonData* addon_data = (ConnAddonData*) zt_conn_data(conn);
 
   ZITI_NODEJS_LOG(INFO, "len: %zd, conn: %p", len, conn);
 
   if (len == ZITI_EOF) {
     if (addon_data->isWebsocket) {
-      ZITI_NODEJS_LOG(DEBUG, "skipping ziti_close on ZITI_EOF due to isWebsocket=true");
+      ZITI_NODEJS_LOG(DEBUG, "skipping zt_close on ZITI_EOF due to isWebsocket=true");
       return 0;
     } else {
-      ziti_close(conn, NULL);
+      zt_close(conn, NULL);
       return 0;
     }
   }
   else if (len < 0) {
-    ziti_close(conn, NULL);
+    zt_close(conn, NULL);
     return 0;
   }
   else {
@@ -193,20 +193,20 @@ long on_data(struct ziti_conn *conn, const unsigned char *buf, long len) {
 /**
  * 
  */
-void on_connect(ziti_connection conn, int status) {
+void on_connect(zt_connection conn, int status) {
   napi_status nstatus;
 
 
-  ConnAddonData* addon_data = (ConnAddonData*) ziti_conn_data(conn);
-  ziti_connection* the_conn = NULL;
+  ConnAddonData* addon_data = (ConnAddonData*) zt_conn_data(conn);
+  zt_connection* the_conn = NULL;
 
   ZITI_NODEJS_LOG(DEBUG, "conn: %p, status: %o, isWebsocket: %o", conn, status, addon_data->isWebsocket);
 
   if (status == ZITI_OK) {
 
-    // Save the 'ziti_connection' to the heap. The JavaScript marshaller (CallJs)
+    // Save the 'zt_connection' to the heap. The JavaScript marshaller (CallJs)
     // will free this item after having sent it to JavaScript.
-    the_conn = malloc(sizeof(ziti_connection));
+    the_conn = malloc(sizeof(zt_connection));
     *the_conn = conn;
   }
 
@@ -217,7 +217,7 @@ void on_connect(ziti_connection conn, int status) {
   // when this function returns, but it will be queued.
   nstatus = napi_call_threadsafe_function(
       addon_data->tsfn_on_connect,
-      the_conn,   // Send the ziti_connection over to the JS callback
+      the_conn,   // Send the zt_connection over to the JS callback
       napi_tsfn_blocking);
     if (nstatus != napi_ok) {
       ZITI_NODEJS_LOG(ERROR, "Unable to napi_call_threadsafe_function");
@@ -228,7 +228,7 @@ void on_connect(ziti_connection conn, int status) {
 /**
  * 
  */
-napi_value _ziti_dial(napi_env env, const napi_callback_info info) {
+napi_value _zt_dial(napi_env env, const napi_callback_info info) {
 
   napi_status status;
   size_t argc = 4;
@@ -331,20 +331,20 @@ napi_value _ziti_dial(napi_env env, const napi_callback_info info) {
   // Init a Ziti connection object, and attach our add-on data to it so we can 
   // pass context around between our callbacks, as propagate it all the way out
   // to the JavaScript callbacks
-  ziti_connection conn;
-  int rc = ziti_conn_init(ztx, &conn, addon_data);
+  zt_connection conn;
+  int rc = zt_conn_init(ztx, &conn, addon_data);
   if (rc != ZITI_OK) {
-    napi_throw_error(env, NULL, "failure in 'ziti_conn_init");
+    napi_throw_error(env, NULL, "failure in 'zt_conn_init");
   }
 
 
   // Connect to the service
-  ZITI_NODEJS_LOG(DEBUG, "calling ziti_dial: %p", ztx);
-  rc = ziti_dial(conn, ServiceName, on_connect, on_data);
+  ZITI_NODEJS_LOG(DEBUG, "calling zt_dial: %p", ztx);
+  rc = zt_dial(conn, ServiceName, on_connect, on_data);
   if (rc != ZITI_OK) {
-    napi_throw_error(env, NULL, "failure in 'ziti_dial");
+    napi_throw_error(env, NULL, "failure in 'zt_dial");
   }
-  ZITI_NODEJS_LOG(DEBUG, "returned from ziti_dial: %p", ztx);
+  ZITI_NODEJS_LOG(DEBUG, "returned from zt_dial: %p", ztx);
 
   return NULL;
 }
@@ -354,18 +354,18 @@ napi_value _ziti_dial(napi_env env, const napi_callback_info info) {
 /**
  * 
  */
-void expose_ziti_dial(napi_env env, napi_value exports) {
+void expose_zt_dial(napi_env env, napi_value exports) {
   napi_status status;
   napi_value fn;
 
-  status = napi_create_function(env, NULL, 0, _ziti_dial, NULL, &fn);
+  status = napi_create_function(env, NULL, 0, _zt_dial, NULL, &fn);
   if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to wrap native function '_ziti_dial");
+    napi_throw_error(env, NULL, "Unable to wrap native function '_zt_dial");
   }
 
-  status = napi_set_named_property(env, exports, "ziti_dial", fn);
+  status = napi_set_named_property(env, exports, "zt_dial", fn);
   if (status != napi_ok) {
-    napi_throw_error(env, NULL, "Unable to populate exports for 'ziti_dial");
+    napi_throw_error(env, NULL, "Unable to populate exports for 'zt_dial");
   }
 
 }

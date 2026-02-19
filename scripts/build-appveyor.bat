@@ -103,7 +103,7 @@ ECHO ===== install node-gyp v6.1 completed ============
 CALL git submodule update --init --recursive
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 CALL cd deps
-CALL cd ziti-sdk-c
+CALL cd zt-sdk-c
 CALL git submodule update --init --recursive
 ECHO ===== starting make sequence... ============
 CALL mkdir build
@@ -114,7 +114,7 @@ CALL cmake -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_BUILD_TYPE=Release -DCMA
 
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 ECHO ===== calling cmake --build ============
-CALL nmake ziti
+CALL nmake zt
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 CALL cd ..
 CALL cd ..

@@ -14,19 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ziti-nodejs.h"
+#include "zt-nodejs.h"
 
-#include <ziti/ziti.h>
+#include <zt/zt.h>
 
 
 /**
  * 
  */
-static napi_value ziti_sdk_version(napi_env env, const napi_callback_info info) {
+static napi_value zt_sdk_version(napi_env env, const napi_callback_info info) {
   napi_value jsRetval = NULL;
   napi_status status = napi_generic_failure;
 
-  const ziti_version *ver = ziti_get_version();
+  const zt_version *ver = zt_get_version();
 
   status = napi_create_string_utf8(env, ver->version, NAPI_AUTO_LENGTH, &jsRetval);
   if (status != napi_ok) return NULL;
@@ -34,4 +34,4 @@ static napi_value ziti_sdk_version(napi_env env, const napi_callback_info info) 
   return jsRetval;
 }
 
-ZNODE_EXPOSE(ziti_sdk_version, ziti_sdk_version)
+ZNODE_EXPOSE(zt_sdk_version, zt_sdk_version)

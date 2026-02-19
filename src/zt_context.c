@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ziti-nodejs.h"
+#include "zt-nodejs.h"
 
-ziti_context ztx = NULL;
+zt_context ztx = NULL;
 
 typedef struct {
   napi_threadsafe_function tsfn;
-  int zitiContextEventStatus;
+  int ztContextEventStatus;
 } AddonData;
 
 
@@ -38,7 +38,7 @@ DECLARE_MODEL(zrok_proxy_cfg_v1, ZROK_PROXY_CFG_V1_MODEL)
 
 /**
  * This function is responsible for calling the JavaScript callback function 
- * that was specified when the ziti_init(...) was called from JavaScript.
+ * that was specified when the zt_init(...) was called from JavaScript.
  */
 static void CallJs(napi_env env, napi_value js_cb, void* context, void* data) {
   // This parameter is not used.
@@ -63,7 +63,7 @@ static void CallJs(napi_env env, napi_value js_cb, void* context, void* data) {
                                                  NAPI_AUTO_LENGTH, &err_msg));
           } else {
               NAPI_CHECK(env, "create error string",
-                         napi_create_string_utf8(env, ziti_errorstr((int) rc), NAPI_AUTO_LENGTH, &err_msg));
+                         napi_create_string_utf8(env, zt_errorstr((int) rc), NAPI_AUTO_LENGTH, &err_msg));
           }
           NAPI_CHECK(env, "create error", napi_create_error(env, NULL, err_msg, &result));
           NAPI_CHECK(env, "calling js callback(error)",
@@ -83,48 +83,48 @@ static void complete_init(AddonData *addon_data, int rc) {
 /**
  * 
  */
-static void on_ziti_event(ziti_context _ztx, const ziti_event_t *event) {
+static void on_zt_event(zt_context _ztx, const zt_event_t *event) {
   napi_status nstatus;
 
-  AddonData* addon_data = (AddonData*)ziti_app_ctx(_ztx);
+  AddonData* addon_data = (AddonData*)zt_app_ctx(_ztx);
 
   switch (event->type) {
 
       case ZitiContextEvent:
           if (event->ctx.ctrl_status == ZITI_OK) {
-              const ziti_version *ctrl_ver = ziti_get_controller_version(_ztx);
-              const ziti_identity *proxy_id = ziti_get_identity(_ztx);
+              const zt_version *ctrl_ver = zt_get_controller_version(_ztx);
+              const zt_identity *proxy_id = zt_get_identity(_ztx);
               ZITI_NODEJS_LOG(INFO, "controller version = %s(%s)[%s]", ctrl_ver->version, ctrl_ver->revision,
                               ctrl_ver->build_date);
               if (proxy_id)
                   ZITI_NODEJS_LOG(INFO, "identity = <%s>[%s]@%s", proxy_id->name, proxy_id->id,
-                                  ziti_get_controller(_ztx));
+                                  zt_get_controller(_ztx));
           } else {
               ZITI_NODEJS_LOG(ERROR, "Failed to connect to controller: %s", event->ctx.err);
               complete_init(addon_data, event->ctx.ctrl_status);
           }
 
-          addon_data->zitiContextEventStatus = event->ctx.ctrl_status;
+          addon_data->ztContextEventStatus = event->ctx.ctrl_status;
 
           break;
 
       case ZitiServiceEvent:
           if (event->service.removed != NULL) {
-              for (ziti_service **sp = event->service.removed; *sp != NULL; sp++) {
+              for (zt_service **sp = event->service.removed; *sp != NULL; sp++) {
                   // service_check_cb(ztx, *sp, ZITI_SERVICE_UNAVAILABLE, app_ctx);
                   ZITI_NODEJS_LOG(INFO, "Service removed [%s]", (*sp)->name);
               }
           }
 
           if (event->service.added != NULL) {
-              for (ziti_service **sp = event->service.added; *sp != NULL; sp++) {
+              for (zt_service **sp = event->service.added; *sp != NULL; sp++) {
                   // service_check_cb(ztx, *sp, ZITI_OK, app_ctx);
                   ZITI_NODEJS_LOG(INFO, "Service added [%s]", (*sp)->name);
               }
           }
 
           if (event->service.changed != NULL) {
-              for (ziti_service **sp = event->service.changed; *sp != NULL; sp++) {
+              for (zt_service **sp = event->service.changed; *sp != NULL; sp++) {
                   // service_check_cb(ztx, *sp, ZITI_OK, app_ctx);
                   ZITI_NODEJS_LOG(INFO, "Service changed [%s]", (*sp)->name);
               }
@@ -133,9 +133,9 @@ static void on_ziti_event(ziti_context _ztx, const ziti_event_t *event) {
           //
           for (int i = 0; event->service.added && event->service.added[i] != NULL; i++) {
 
-              ziti_service *s = event->service.added[i];
-              ziti_intercept_cfg_v1 *intercept = alloc_ziti_intercept_cfg_v1();
-              ziti_client_cfg_v1 clt_cfg = {
+              zt_service *s = event->service.added[i];
+              zt_intercept_cfg_v1 *intercept = alloc_zt_intercept_cfg_v1();
+              zt_client_cfg_v1 clt_cfg = {
                       .hostname = {0},
                       .port = 0
               };
@@ -145,13 +145,13 @@ static void on_ziti_event(ziti_context _ztx, const ziti_event_t *event) {
                       .oauth = ""
               };
 
-              if (ziti_service_get_config(s, ZITI_INTERCEPT_CFG_V1, intercept,
-                                          (int (*)(void *, const char *, size_t)) parse_ziti_intercept_cfg_v1) ==
+              if (zt_service_get_config(s, ZITI_INTERCEPT_CFG_V1, intercept,
+                                          (int (*)(void *, const char *, size_t)) parse_zt_intercept_cfg_v1) ==
                   ZITI_OK) {
 
-                  const ziti_address *range_addr;
+                  const zt_address *range_addr;
                   MODEL_LIST_FOREACH(range_addr, intercept->addresses) {
-                      ziti_port_range *p;
+                      zt_port_range *p;
                       MODEL_LIST_FOREACH(p, intercept->port_ranges) {
                           int lowport = p->low;
                           while (lowport <= p->high) {
@@ -161,37 +161,37 @@ static void on_ziti_event(ziti_context _ztx, const ziti_event_t *event) {
                       }
                   }
 
-              } else if (ziti_service_get_config(s, ZITI_CLIENT_CFG_V1, &clt_cfg, (int (*)(void *, const char *,
-                                                                                           unsigned long)) parse_ziti_client_cfg_v1) ==
+              } else if (zt_service_get_config(s, ZITI_CLIENT_CFG_V1, &clt_cfg, (int (*)(void *, const char *,
+                                                                                           unsigned long)) parse_zt_client_cfg_v1) ==
                          ZITI_OK) {
                   track_service_to_hostname(s->name, clt_cfg.hostname.addr.hostname, clt_cfg.port);
 
-              } else if (ziti_service_get_config(s, ZROK_PROXY_CFG_V1, &zrok_cfg, (int (*)(void *, const char *,
-                                                                                           unsigned long)) parse_ziti_client_cfg_v1) ==
+              } else if (zt_service_get_config(s, ZROK_PROXY_CFG_V1, &zrok_cfg, (int (*)(void *, const char *,
+                                                                                           unsigned long)) parse_zt_client_cfg_v1) ==
                          ZITI_OK) {
                   track_service_to_hostname(s->name, s->name, 80);
               }
 
-              free_ziti_intercept_cfg_v1(intercept);
+              free_zt_intercept_cfg_v1(intercept);
               free(intercept);
           }
 
           for (int i = 0; event->service.changed && event->service.changed[i] != NULL; i++) {
 
-              ziti_service *s = event->service.changed[i];
-              ziti_intercept_cfg_v1 *intercept = alloc_ziti_intercept_cfg_v1();
-              ziti_client_cfg_v1 clt_cfg = {
+              zt_service *s = event->service.changed[i];
+              zt_intercept_cfg_v1 *intercept = alloc_zt_intercept_cfg_v1();
+              zt_client_cfg_v1 clt_cfg = {
                       .hostname = {0},
                       .port = 0
               };
 
-              if (ziti_service_get_config(s, ZITI_INTERCEPT_CFG_V1, intercept,
-                                          (int (*)(void *, const char *, size_t)) parse_ziti_intercept_cfg_v1) ==
+              if (zt_service_get_config(s, ZITI_INTERCEPT_CFG_V1, intercept,
+                                          (int (*)(void *, const char *, size_t)) parse_zt_intercept_cfg_v1) ==
                   ZITI_OK) {
 
-                  const ziti_address *range_addr;
+                  const zt_address *range_addr;
                   MODEL_LIST_FOREACH(range_addr, intercept->addresses) {
-                      ziti_port_range *p;
+                      zt_port_range *p;
                       MODEL_LIST_FOREACH(p, intercept->port_ranges) {
                           int lowport = p->low;
                           while (lowport <= p->high) {
@@ -201,41 +201,41 @@ static void on_ziti_event(ziti_context _ztx, const ziti_event_t *event) {
                       }
                   }
 
-              } else if (ziti_service_get_config(s, ZITI_CLIENT_CFG_V1, &clt_cfg, (int (*)(void *, const char *,
-                                                                                           unsigned long)) parse_ziti_client_cfg_v1) ==
+              } else if (zt_service_get_config(s, ZITI_CLIENT_CFG_V1, &clt_cfg, (int (*)(void *, const char *,
+                                                                                           unsigned long)) parse_zt_client_cfg_v1) ==
                          ZITI_OK) {
                   track_service_to_hostname(s->name, clt_cfg.hostname.addr.hostname, clt_cfg.port);
               }
 
-              free_ziti_intercept_cfg_v1(intercept);
+              free_zt_intercept_cfg_v1(intercept);
               free(intercept);
           }
 
           // Initiate the call into the JavaScript 'on_init' callback, now that we know about all the services
           ZITI_NODEJS_LOG(DEBUG, "init callback = %p", addon_data->tsfn);
-          complete_init(addon_data, addon_data->zitiContextEventStatus);
+          complete_init(addon_data, addon_data->ztContextEventStatus);
           break;
 
       case ZitiAuthEvent: {
           int status = ZITI_EXTERNAL_LOGIN_REQUIRED;
           switch (event->auth.action) {
-              case ziti_auth_login_external:
+              case zt_auth_login_external:
                   ZITI_NODEJS_LOG(INFO, "external auth required: type=%s, detail=%s", event->auth.type,
                                   event->auth.detail);
                   break;
-              case ziti_auth_select_external:
+              case zt_auth_select_external:
                   ZITI_NODEJS_LOG(INFO, "select external auth provider: type=%s", event->auth.type);
                   break;
-              case ziti_auth_cannot_continue:
+              case zt_auth_cannot_continue:
                   status = ZITI_AUTHENTICATION_FAILED;
                   ZITI_NODEJS_LOG(ERROR, "cannot continue authentication: type=%s, detail=%s", event->auth.type,
                                   event->auth.detail);
                   break;
-              case ziti_auth_prompt_totp:
+              case zt_auth_prompt_totp:
                   ZITI_NODEJS_LOG(INFO, "external auth required: type=%s, detail=%s", event->auth.type,
                                   event->auth.detail);
                   break;
-              case ziti_auth_prompt_pin:
+              case zt_auth_prompt_pin:
                   ZITI_NODEJS_LOG(INFO, "external auth required: type=%s, detail=%s", event->auth.type,
                                   event->auth.detail);
                   break;
@@ -246,14 +246,14 @@ static void on_ziti_event(ziti_context _ztx, const ziti_event_t *event) {
       case ZitiRouterEvent: {
           switch (event->router.status) {
               case EdgeRouterConnected:
-                  ZITI_NODEJS_LOG(INFO, "ziti connected to edge router %s\nversion = %s", event->router.name,
+                  ZITI_NODEJS_LOG(INFO, "zt connected to edge router %s\nversion = %s", event->router.name,
                                   event->router.version);
                   break;
               case EdgeRouterDisconnected:
-                  ZITI_NODEJS_LOG(INFO, "ziti disconnected from edge router %s", event->router.name);
+                  ZITI_NODEJS_LOG(INFO, "zt disconnected from edge router %s", event->router.name);
                   break;
               case EdgeRouterRemoved:
-                  ZITI_NODEJS_LOG(INFO, "ziti removed edge router %s", event->router.name);
+                  ZITI_NODEJS_LOG(INFO, "zt removed edge router %s", event->router.name);
                   break;
               case EdgeRouterUnavailable:
                   ZITI_NODEJS_LOG(INFO, "edge router %s is not available", event->router.name);
@@ -300,18 +300,18 @@ static napi_value load_ztx(napi_env env, napi_callback_info info) {
     }
     ZITI_NODEJS_LOG(DEBUG, "config_file_name: %s", config_file_name);
 
-    ziti_config cfg = {0};
-    int rc = ziti_load_config(&cfg, config_file_name);
-    ZITI_NODEJS_LOG(DEBUG, "ziti_load_config => %d", rc);
+    zt_config cfg = {0};
+    int rc = zt_load_config(&cfg, config_file_name);
+    ZITI_NODEJS_LOG(DEBUG, "zt_load_config => %d", rc);
     if (rc != ZITI_OK) {
-        napi_throw_error(env, "EINVAL", ziti_errorstr(rc));
+        napi_throw_error(env, "EINVAL", zt_errorstr(rc));
         return NULL;
     }
 
-    rc = ziti_context_init(&ztx, &cfg);
-    ZITI_NODEJS_LOG(DEBUG, "ziti_context_init => %d", rc);
+    rc = zt_context_init(&ztx, &cfg);
+    ZITI_NODEJS_LOG(DEBUG, "zt_context_init => %d", rc);
     if (rc != ZITI_OK) {
-        napi_throw_error(env, "EINVAL", ziti_errorstr(rc));
+        napi_throw_error(env, "EINVAL", zt_errorstr(rc));
     }
 
     // Obtain ptr to JS callback function
@@ -319,7 +319,7 @@ static napi_value load_ztx(napi_env env, napi_callback_info info) {
     AddonData *addon_data = calloc(1, sizeof(AddonData));
 
     // Create a string to describe this asynchronous operation.
-    NAPI_LITERAL(env, work_name, "N-API on_ziti_init");
+    NAPI_LITERAL(env, work_name, "N-API on_zt_init");
 
     // Convert the callback retrieved from JavaScript into a thread-safe function (tsfn)
     // which we can call from a worker thread.
@@ -336,20 +336,20 @@ static napi_value load_ztx(napi_env env, napi_callback_info info) {
             CallJs,
             &(addon_data->tsfn)));
 
-    ziti_options opts = {
+    zt_options opts = {
             .events = ZitiContextEvent | ZitiServiceEvent | ZitiRouterEvent | ZitiAuthEvent,
-            .event_cb = on_ziti_event,
+            .event_cb = on_zt_event,
             .refresh_interval = 60,
             .app_ctx = addon_data,
             .config_types = ALL_CONFIG_TYPES,
             .metrics_type = INSTANT,
     };
-    rc = ziti_context_set_options(ztx, &opts);
-    ZITI_NODEJS_LOG(DEBUG, "ziti_context_set_options => %d", rc);
+    rc = zt_context_set_options(ztx, &opts);
+    ZITI_NODEJS_LOG(DEBUG, "zt_context_set_options => %d", rc);
     if (rc != ZITI_OK) goto done;
 
-    rc = ziti_context_run(ztx, thread_loop);
-    ZITI_NODEJS_LOG(DEBUG, "ziti_context_run => %d", rc);
+    rc = zt_context_run(ztx, thread_loop);
+    ZITI_NODEJS_LOG(DEBUG, "zt_context_run => %d", rc);
 
     done:
     if (rc != ZITI_OK) {
@@ -357,9 +357,9 @@ static napi_value load_ztx(napi_env env, napi_callback_info info) {
             napi_release_threadsafe_function(addon_data->tsfn, napi_tsfn_release);
         }
         free(addon_data);
-        napi_throw_error(env, "EINVAL", ziti_errorstr(rc));
+        napi_throw_error(env, "EINVAL", zt_errorstr(rc));
         if (ztx) {
-            ziti_shutdown(ztx);
+            zt_shutdown(ztx);
             ztx = NULL;
         }
     }
@@ -372,17 +372,17 @@ static napi_value ztx_shutdown(napi_env env, napi_callback_info info) {
     ZITI_NODEJS_LOG(DEBUG, "ztx: %p", ztx);
     NAPI_UNDEFINED(env, jsRetval);
     if (ztx) {
-        AddonData *addon_data = (AddonData*)ziti_app_ctx(ztx);
+        AddonData *addon_data = (AddonData*)zt_app_ctx(ztx);
         if (addon_data && addon_data->tsfn) {
             napi_release_threadsafe_function(addon_data->tsfn, napi_tsfn_release);
             free(addon_data);
         }
-        ziti_shutdown(ztx);
+        zt_shutdown(ztx);
     }
     return jsRetval;
 }
 
 
-ZNODE_EXPOSE(ziti_init, load_ztx)
+ZNODE_EXPOSE(zt_init, load_ztx)
 
-ZNODE_EXPOSE(ziti_shutdown, ztx_shutdown)
+ZNODE_EXPOSE(zt_shutdown, ztx_shutdown)
